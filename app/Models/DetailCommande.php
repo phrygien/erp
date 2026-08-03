@@ -41,4 +41,25 @@ class DetailCommande extends Model
     {
         return $this->hasMany(RepartitionDetailCommande::class, 'detail_commande_id');
     }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function (DetailCommande $detail) {
+            $ht = (float) $detail->pu_achat_HT;
+            $tax = (float) $detail->tax;
+            $remise = (float) $detail->taux_remise;
+
+            $detail->pu_achat_net = $ht + ($ht * $tax / 100) - ($ht * $remise / 100);
+        });
+
+        static::saved(fn (DetailCommande $detail) => $detail->commande?->updateMontantTotal());
+        static::deleted(fn (DetailCommande $detail) => $detail->commande?->updateMontantTotal());
+    }
+
+    public function updateQuantiteFromRepartitions(): void
+    {
+        $this->update(['quantite' => $this->repartitions()->sum('quantite')]);
+    }
 }

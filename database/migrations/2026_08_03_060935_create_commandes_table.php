@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('commandes', function (Blueprint $table) {
             $table->id();
+            $table->string('numero_commande');
             $table->string('libelle');
             $table->decimal('montant_minimum', 10, 2)->nullable();
             $table->decimal('montant_total', 10, 2);
