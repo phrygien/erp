@@ -10,11 +10,14 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class TypeResource extends Resource
@@ -32,7 +35,12 @@ class TypeResource extends Resource
             ->components([
                 TextInput::make('name')
                     ->required(),
-                TextInput::make('state')
+                Select::make('state')
+                    ->label('Statut')
+                    ->options([
+                        'active' => 'Actif',
+                        'inactive' => 'Inactif',
+                    ])
                     ->required()
                     ->default('active'),
             ]);
@@ -45,8 +53,20 @@ class TypeResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('state')
-                    ->searchable(),
+                ToggleColumn::make('state')
+                    ->label('Actif')
+                    ->getStateUsing(fn ($record) => $record->state === 'active')
+                    ->updateStateUsing(function ($record, $state) {
+                        $record->state = $state ? 'active' : 'inactive';
+                        $record->save();
+                    })
+                    ->afterStateUpdated(function ($record, $state) {
+                        Notification::make()
+                            ->title('Statut mis à jour')
+                            ->body($record->name . ' est maintenant ' . ($state ? 'actif' : 'inactif'))
+                            ->success()
+                            ->send();
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Marques;
 use App\Filament\Resources\Marques\Pages\CreateMarque;
 use App\Filament\Resources\Marques\Pages\EditMarque;
 use App\Filament\Resources\Marques\Pages\ListMarques;
+use App\Filament\Resources\Marques\RelationManagers\ProductsRelationManager;
 use App\Filament\Resources\Marques\Schemas\MarqueForm;
 use App\Filament\Resources\Marques\Tables\MarquesTable;
 use App\Models\Marque;
@@ -38,7 +39,7 @@ class MarqueResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductsRelationManager::class,
         ];
     }
 

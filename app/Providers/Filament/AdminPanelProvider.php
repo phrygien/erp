@@ -25,10 +25,11 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->spa()
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogo(asset('images/img.png'))
             ->colors([
                 'primary' => Color::Rose,
             ])
