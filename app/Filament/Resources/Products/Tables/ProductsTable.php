@@ -18,12 +18,6 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('product_code')
-                    ->label('Code')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-
                 TextColumn::make('designation')
                     ->label('Désignation')
                     ->searchable()
@@ -70,16 +64,6 @@ class ProductsTable
                     ->sortable()
                     ->alignEnd()
                     ->toggleable(),
-
-                TextColumn::make('statut_parkod')
-                    ->label('Statut Parkod')
-                    ->badge()
-                    ->color(fn ($state) => match ($state) {
-                        'ok', 'valid', 'valide' => 'success',
-                        'error', 'erreur' => 'danger',
-                        default => 'gray',
-                    })
-                    ->searchable(),
 
                 ToggleColumn::make('state')
                     ->label('Actif')
@@ -160,6 +144,6 @@ class ProductsTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('product_code');
+            ->defaultSort('designation');
     }
 }
