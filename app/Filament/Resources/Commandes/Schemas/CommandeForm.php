@@ -73,6 +73,7 @@ class CommandeForm
                                 ])
                                 ->default('pre_commande')
                                 ->inline()
+                                ->live()
                                 ->required(),
 
                             ToggleButtons::make('statut_commande')
@@ -95,6 +96,8 @@ class CommandeForm
                                     'facturee' => 'warning',
                                     'cloturee' => 'success',
                                 ])
+                                ->disableOptionWhen(fn (string $value, callable $get): bool => in_array($value, ['facturee', 'cloturee'])
+                                    && $get('etat_commande') === 'pre_commande')
                                 ->default('cree')
                                 ->inline()
                                 ->required(),

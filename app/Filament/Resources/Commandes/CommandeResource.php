@@ -7,6 +7,7 @@ use App\Filament\Resources\Commandes\Pages\EditCommande;
 use App\Filament\Resources\Commandes\Pages\ListCommandes;
 use App\Filament\Resources\Commandes\Pages\ViewCommande;
 use App\Filament\Resources\Commandes\RelationManagers\StatusHistoriesRelationManager;
+use App\Filament\Resources\Commandes\RelationManagers\RepartitionHistoriquesRelationManager;
 use App\Filament\Resources\Commandes\Schemas\CommandeForm;
 use App\Filament\Resources\Commandes\Schemas\CommandeInfolist;
 use App\Filament\Resources\Commandes\Tables\CommandesTable;
@@ -48,6 +49,7 @@ class CommandeResource extends Resource
         return [
             DetailCommandesRelationManager::class,
             StatusHistoriesRelationManager::class,
+            RepartitionHistoriquesRelationManager::class,
         ];
     }
 

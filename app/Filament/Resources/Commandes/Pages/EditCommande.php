@@ -52,15 +52,15 @@ class EditCommande extends EditRecord
         });
 
         foreach ($items as $item) {
-            $puAchatNet = $this->calculatePuAchatNet($item);
-
             $detail = $this->record->detailCommandes()->create([
                 'product_id'   => $item['product_id'],
                 'pu_achat_HT'  => $item['pu_achat_HT'],
                 'tax'          => $item['tax'],
                 'taux_remise'  => $item['taux_remise'],
-                'pu_achat_net' => $puAchatNet,
                 'quantite'     => $item['quantite'],
+                // pu_achat_net n'est pas passé ici : le hook saving() de
+                // DetailCommande le recalcule systématiquement à partir de
+                // pu_achat_HT / tax / taux_remise. Une seule source de vérité.
             ]);
 
             foreach ($magasinIds as $magasinId) {
@@ -74,6 +74,11 @@ class EditCommande extends EditRecord
                 }
             }
         }
+
+        // Pas d'appel manuel a une synchro BonCommande ici : chaque creation /
+        // suppression de DetailCommande ci-dessus declenche deja
+        // Commande::updateMontantTotal(), qui declenche a son tour
+        // Commande::syncBonCommande() automatiquement (voir boot() du modele).
     }
 
     private function calculatePuAchatNet(array $item): float

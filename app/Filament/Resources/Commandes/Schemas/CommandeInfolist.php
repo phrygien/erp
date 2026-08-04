@@ -71,7 +71,7 @@ class CommandeInfolist
                                 TextEntry::make('montant_minimum')
                                     ->label('Montant minimum')
                                     ->numeric(decimalPlaces: 2)
-                                    ->suffix(' MUR')
+                                    ->suffix(' EUR')
 
                                     ->placeholder('-'),
 
@@ -91,7 +91,7 @@ class CommandeInfolist
                                 TextEntry::make('montant_total')
                                     ->label('Montant total')
                                     ->numeric(decimalPlaces: 2)
-                                    ->suffix(' MUR')
+                                    ->suffix(' EUR')
                                     ->color('success'),
 
                                 TextEntry::make('createdBy.name')

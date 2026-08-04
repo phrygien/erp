@@ -76,7 +76,7 @@ class DetailCommandesRelationManager extends RelationManager
                 TextColumn::make('pu_achat_HT')
                     ->label('PU Achat HT')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR'),
+                    ->suffix(' EUR'),
 
                 TextColumn::make('tax')
                     ->label('Taxe %')
@@ -91,7 +91,7 @@ class DetailCommandesRelationManager extends RelationManager
                 TextColumn::make('pu_achat_net')
                     ->label('PU Achat Net')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR'),
+                    ->suffix(' EUR'),
 
                 TextColumn::make('quantite')
                     ->label('Quantité')
@@ -139,6 +139,13 @@ class DetailCommandesRelationManager extends RelationManager
                                     ['quantite' => (float) ($data["repartition_{$magasin->id}"] ?? 0)]
                                 );
                             }
+
+                            // Répercute la somme des répartitions sur la quantité
+                            // du détail. Ce ->update() déclenche automatiquement,
+                            // via les hooks de DetailCommande puis de Commande,
+                            // le recalcul du montant_total de la commande et la
+                            // synchronisation du bon de commande lié.
+                            $record->updateQuantiteFromRepartitions();
                         }),
 
                     EditAction::make(),

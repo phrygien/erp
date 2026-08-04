@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table(name: 'categories')]
-#[Fillable(['code', 'name', 'state'])]
+#[Fillable(['code', 'name', 'state', 'marque_id'])]
 class Category extends Model
 {
     public function products(): HasMany
