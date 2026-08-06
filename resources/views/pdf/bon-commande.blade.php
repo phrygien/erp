@@ -362,8 +362,8 @@
             <td>{{ $detail->product->designation }} <br><small>Réf. {{ $detail->product->product_code }}</small></td>
             <td>{{ $detail->product->marque?->name ?? '-' }}</td>
             <td class="center">{{ $detail->quantite }}</td>
-            <td class="num">{{ number_format($detail->pu_achat_net, 2) }} MUR</td>
-            <td class="num">{{ number_format($detail->pu_achat_net * $detail->quantite, 2) }} MUR</td>
+            <td class="num">{{ number_format($detail->pu_achat_net, 2) }} EUR</td>
+            <td class="num">{{ number_format($detail->pu_achat_net * $detail->quantite, 2) }} EUR</td>
         </tr>
     @endforeach
     </tbody>
@@ -385,7 +385,7 @@
             <table class="totals-table">
                 <tr>
                     <td class="t-label">Sous-total</td>
-                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => $d->pu_achat_HT * $d->quantite), 2) }} MUR</td>
+                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => $d->pu_achat_HT * $d->quantite), 2) }} EUR</td>
                 </tr>
                 <tr>
                     <td class="t-label">Remise facture</td>
@@ -393,11 +393,11 @@
                 </tr>
                 <tr>
                     <td class="t-label">Taxe</td>
-                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => ($d->pu_achat_HT * $d->tax / 100) * $d->quantite), 2) }} MUR</td>
+                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => ($d->pu_achat_HT * $d->tax / 100) * $d->quantite), 2) }} EUR</td>
                 </tr>
                 <tr class="final-row">
                     <td class="t-label">TOTAL</td>
-                    <td class="t-value">{{ number_format($bonCommande->montant_commande, 2) }} MUR</td>
+                    <td class="t-value">{{ number_format($bonCommande->montant_commande, 2) }} EUR</td>
                 </tr>
             </table>
         </td>
