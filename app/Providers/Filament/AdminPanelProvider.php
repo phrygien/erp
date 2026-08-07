@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
-            ->font('Bricolage Grotesque')
+            ->font('Jost')
             ->id('admin')
             ->path('admin')
             ->login()
