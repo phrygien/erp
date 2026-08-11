@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
+use App\Observers\CommandeObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Notifications\Notifiable;
 
 #[Table(name: 'commandes')]
+#[ObservedBy(CommandeObserver::class)]
 class Commande extends Model
 {
+    use Notifiable;
+
     protected $fillable = [
         'numero_commande',
         'libelle',
@@ -33,51 +37,6 @@ class Commande extends Model
         'montant_total' => 'decimal:2',
         'remise_facture' => 'decimal:2',
     ];
-
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function (Commande $commande) {
-            if (empty($commande->numero_commande)) {
-                $commande->numero_commande = static::generateNumeroCommande();
-            }
-        });
-
-        static::updating(function (Commande $commande) {
-            $champsSuivis = ['etat_commande', 'statut_commande'];
-
-            foreach ($champsSuivis as $champ) {
-                if ($commande->isDirty($champ)) {
-                    $commande->statusHistories()->create([
-                        'champ' => $champ,
-                        'ancienne_valeur' => $commande->getOriginal($champ),
-                        'nouvelle_valeur' => $commande->{$champ},
-                        'changed_by' => Auth::id(),
-                    ]);
-                }
-            }
-        });
-
-        // Point central : dès que le montant, le statut, le fournisseur ou le
-        // magasin de la commande change (peu importe d'où vient la sauvegarde :
-        // wizard d'édition, RelationManager, recalcul automatique via les
-        // DetailCommande...), on répercute sur le bon de commande lié s'il existe.
-        static::updated(function (Commande $commande) {
-            if ($commande->isDirty(['montant_total', 'statut_commande', 'fournisseur_id', 'magasin_id'])) {
-                $commande->syncBonCommande();
-            }
-        });
-    }
-
-    protected static function generateNumeroCommande(): string
-    {
-        do {
-            $numero = strtoupper(Str::random(5));
-        } while (static::query()->where('numero_commande', $numero)->exists());
-
-        return $numero;
-    }
 
     public function fournisseur(): BelongsTo
     {

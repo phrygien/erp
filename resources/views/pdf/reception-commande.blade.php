@@ -1,9 +1,8 @@
-{{-- resources/views/pdf/bon-commande.blade.php --}}
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Bon de commande {{ $bonCommande->numero }}</title>
+    <title>Bon de réception {{ $reception->numero_reception }}</title>
     <style>
         @page { margin: 30px 35px; }
         body {
@@ -58,7 +57,7 @@
             margin-left: 4px;
         }
 
-        /* ---------- Facturer à / Expédier à ---------- */
+        /* ---------- Fournisseur / Réception ---------- */
         .parties-table {
             width: 100%;
             border-collapse: collapse;
@@ -96,7 +95,7 @@
             min-height: 12px;
         }
 
-        /* ---------- Bandeau infos ---------- */
+        /* ---------- Bandeau infos livraison ---------- */
         table.ship-info {
             width: 100%;
             border-collapse: collapse;
@@ -119,7 +118,7 @@
             border-bottom: 1px solid #fff;
         }
 
-        /* ---------- Tableau produits ---------- */
+        /* ---------- Tableau détail ---------- */
         table.details {
             width: 100%;
             border-collapse: collapse;
@@ -142,10 +141,6 @@
         }
         table.details tbody tr:nth-child(even) {
             background: #f6f7fb;
-        }
-        table.details small {
-            color: #999;
-            font-size: 8.5px;
         }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
@@ -178,11 +173,6 @@
             padding: 8px;
             font-size: 10.5px;
             color: #555;
-        }
-        .remarks-box .note {
-            font-size: 8.5px;
-            color: #999;
-            margin-top: 6px;
         }
 
         .totals-cell {
@@ -254,133 +244,137 @@
 <table class="header-table">
     <tr>
         <td class="company-cell">
-            <div class="company-name">{{ config('app.name', 'ERP') }}</div>
-            <div>{{ $bonCommande->magasinLivraison->adresse ?? '-' }}</div>
-            @if($bonCommande->magasinLivraison->telephone ?? null)
-                <div>Tél : {{ $bonCommande->magasinLivraison->telephone }}</div>
+            <div class="company-name">{{ $magasin?->name ?? 'Magasin' }}</div>
+            <div>{{ $magasin?->adresse ?? '-' }}</div>
+            @if($magasin?->telephone)
+                <div>Tél : {{ $magasin->telephone }}</div>
             @endif
         </td>
         <td class="title-cell">
-            <h1>BON DE COMMANDE</h1>
+            <h1>BON DE RÉCEPTION</h1>
             <div class="meta">
-                DATE <span class="val">{{ $bonCommande->date_commande?->format('d/m/Y') ?? '-' }}</span>
+                DATE <span class="val">{{ $formattedDate }}</span>
             </div>
             <div class="meta">
-                N° BON DE COMMANDE <span class="val">{{ $bonCommande->numero }}</span>
+                N° RÉCEPTION <span class="val">{{ $reception->numero_reception }}</span>
             </div>
         </td>
     </tr>
 </table>
 
-{{-- Facturer à / Expédier à --}}
+{{-- Fournisseur / Réception --}}
 <table class="parties-table">
     <tr>
         <td>
-            <div class="section-label">Facturer à</div>
+            <div class="section-label">Fournisseur</div>
 
             <div class="field-line">
-                <span class="fl-label">Fournisseur</span>
-                <span class="fl-value">{{ $commande->fournisseur->name }}</span>
+                <span class="fl-label">Société</span>
+                <span class="fl-value">{{ $fournisseur?->raison_social ?? $fournisseur?->name ?? '-' }}</span>
             </div>
             <div class="field-line">
                 <span class="fl-label">Adresse</span>
-                <span class="fl-value">{{ $commande->fournisseur->adresse_siege ?? '-' }}</span>
+                <span class="fl-value">{{ $fournisseur?->adresse_siege ?? '-' }}</span>
             </div>
             <div class="field-line">
                 <span class="fl-label">Ville</span>
-                <span class="fl-value">{{ trim(($commande->fournisseur->code_postal ?? '') . ' ' . ($commande->fournisseur->ville ?? '')) ?: '-' }}</span>
+                <span class="fl-value">{{ trim(($fournisseur?->code_postal ?? '') . ' ' . ($fournisseur?->ville ?? '')) ?: '-' }}</span>
             </div>
             <div class="field-line">
                 <span class="fl-label">Téléphone</span>
-                <span class="fl-value">{{ $commande->fournisseur->telephone ?? '-' }}</span>
-            </div>
-            <div class="field-line">
-                <span class="fl-label">E-mail</span>
-                <span class="fl-value">{{ $commande->fournisseur->email ?? '-' }}</span>
+                <span class="fl-value">{{ $fournisseur?->telephone ?? '-' }}</span>
             </div>
         </td>
         <td>
-            <div class="section-label">Expédier à</div>
+            <div class="section-label">Réception</div>
 
             <div class="field-line">
-                <span class="fl-label">Magasin</span>
-                <span class="fl-value">{{ $bonCommande->magasinLivraison->name ?? '-' }}</span>
+                <span class="fl-label">N° commande</span>
+                <span class="fl-value">{{ $reception->commande?->numero_commande ?? '-' }}</span>
             </div>
             <div class="field-line">
-                <span class="fl-label">Adresse</span>
-                <span class="fl-value">{{ $bonCommande->magasinLivraison->adresse ?? '-' }}</span>
+                <span class="fl-label">Bon de commande</span>
+                <span class="fl-value">{{ $reception->bonCommande?->numero ?? '-' }}</span>
             </div>
             <div class="field-line">
-                <span class="fl-label">Téléphone</span>
-                <span class="fl-value">{{ $bonCommande->magasinLivraison->telephone ?? '-' }}</span>
+                <span class="fl-label">Réceptionné par</span>
+                <span class="fl-value">{{ $reception->receivedBy?->name ?? '-' }}</span>
             </div>
             <div class="field-line">
-                <span class="fl-label">N° de compte</span>
-                <span class="fl-value">{{ $bonCommande->numero_compte ?? '-' }}</span>
-            </div>
-            <div class="field-line">
-                <span class="fl-label">Code fournisseur</span>
-                <span class="fl-value">{{ $bonCommande->code_fournisseur ?? '-' }}</span>
+                <span class="fl-label">Statut</span>
+                <span class="fl-value">
+                        <span class="badge" style="background: {{ match($reception->statut) {
+                            'en_cours' => '#d97706',
+                            'partielle' => '#2563eb',
+                            'complete' => '#059669',
+                            'annulee' => '#dc2626',
+                            default => '#8b93c7',
+                        } }};">
+                            {{ match($reception->statut) {
+                                'en_cours' => 'EN COURS',
+                                'partielle' => 'PARTIELLE',
+                                'complete' => 'COMPLÈTE',
+                                'annulee' => 'ANNULÉE',
+                                default => strtoupper($reception->statut),
+                            } }}
+                        </span>
+                    </span>
             </div>
         </td>
     </tr>
 </table>
 
-{{-- Bandeau infos --}}
+{{-- Bandeau infos livraison --}}
 <table class="ship-info">
     <thead>
     <tr>
-        <th style="width: 30%;">Statut</th>
-        <th style="width: 25%;">Date de livraison souhaitée</th>
-        <th style="width: 25%;">Approuvée par</th>
-        <th style="width: 20%;">N° commande liée</th>
+        <th style="width: 30%;">Fournisseur</th>
+        <th style="width: 25%;">Date de réception</th>
+        <th style="width: 25%;">N° bon livraison</th>
+        <th style="width: 20%;">Nb lignes</th>
     </tr>
     </thead>
     <tbody>
-    @php
-        $statutLabels = ['annule' => 'Annulé', 'cree' => 'Créé', 'facturee' => 'Facturée', 'cloturee' => 'Clôturée'];
-    @endphp
     <tr>
-        <td>{{ $statutLabels[$bonCommande->statut_commande] ?? $bonCommande->statut_commande }}</td>
-        <td>{{ $bonCommande->date_livraison?->format('d/m/Y') ?? '-' }}</td>
-        <td>{{ $bonCommande->createdBy->name ?? '-' }}</td>
-        <td>{{ $commande->numero_commande }}</td>
+        <td>{{ $fournisseur?->name ?? '-' }}</td>
+        <td>{{ $formattedDate }}</td>
+        <td>{{ $reception->numero_bl ?? '-' }}</td>
+        <td>{{ $reception->details->count() }}</td>
     </tr>
     </tbody>
 </table>
 
-{{-- Tableau des produits --}}
+{{-- Tableau des lignes --}}
 <table class="details">
     <thead>
     <tr>
-        <th style="width: 6%;">N°</th>
-        <th style="width: 12%;">EAN</th>
-        <th style="width: 30%;">Description</th>
-        <th style="width: 12%;">Marque</th>
-        <th style="width: 8%;" class="text-center">Qté</th>
-        <th style="width: 16%;" class="text-right">Prix unitaire</th>
-        <th style="width: 16%;" class="text-right">Total</th>
+        <th style="width: 10%;">Code</th>
+        <th style="width: 28%;">Nom du produit / description</th>
+        <th style="width: 10%;" class="text-center">Qté cmd.</th>
+        <th style="width: 10%;" class="text-center">Qté reçue</th>
+        <th style="width: 11%;" class="text-center">Qté invend.</th>
+        <th style="width: 11%;" class="text-center">Qté vendable</th>
+        <th style="width: 10%;">Motif</th>
+        <th style="width: 10%;">Commentaire</th>
     </tr>
     </thead>
     <tbody>
-    @foreach ($commande->detailCommandes as $index => $detail)
+    @foreach($reception->details as $detail)
         <tr>
-            <td class="text-center">{{ $index + 1 }}</td>
-            <td>{{ $detail->product->EAN }}</td>
-            <td>
-                {{ $detail->product->designation }}
-                <br><small>Réf. {{ $detail->product->product_code }}</small>
-            </td>
-            <td>{{ $detail->product->marque?->name ?? '-' }}</td>
-            <td class="text-center">{{ $detail->quantite }}</td>
-            <td class="text-right">{{ number_format($detail->pu_achat_net, 2) }} EUR</td>
-            <td class="text-right">{{ number_format($detail->pu_achat_net * $detail->quantite, 2) }} EUR</td>
+            <td>{{ $detail->product?->EAN ?? '-' }}</td>
+            <td>{{ $detail->product?->designation ?? '-' }}</td>
+            <td class="text-center">{{ $detail->detailCommande?->quantite ?? '-' }}</td>
+            <td class="text-center">{{ $detail->qte_recue }}</td>
+            <td class="text-center">{{ $detail->qte_invendable }}</td>
+            <td class="text-center">{{ $detail->qte_bonne }}</td>
+            <td>{{ $detail->motif_invendable ?? '-' }}</td>
+            <td>{{ $detail->commentaire ?? '-' }}</td>
         </tr>
     @endforeach
 
-    @if($commande->detailCommandes->isEmpty())
+    @if($reception->details->isEmpty())
         <tr>
-            <td colspan="7" class="text-center">Aucun produit</td>
+            <td colspan="8" class="text-center">Aucune ligne de réception</td>
         </tr>
     @endif
     </tbody>
@@ -390,13 +384,8 @@
 <table class="bottom-table">
     <tr>
         <td class="remarks-cell">
-            <div class="section-label">Remarques / instructions</div>
-            <div class="remarks-box">
-                {{ $commande->libelle ?? '—' }}
-                <div class="note">
-                    Bon de commande généré automatiquement à partir de la commande n° {{ $commande->numero_commande }}.
-                </div>
-            </div>
+            <div class="section-label">Remarques / notes</div>
+            <div class="remarks-box">{{ $reception->commentaire ?? '—' }}</div>
 
             <div class="signature-row">
                 <span class="fl-label">Signature</span><br>
@@ -406,20 +395,20 @@
         <td class="totals-cell">
             <table class="totals">
                 <tr>
-                    <td class="t-label">Sous-total</td>
-                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => $d->pu_achat_HT * $d->quantite), 2) }} EUR</td>
+                    <td class="t-label">Total quantité commandée</td>
+                    <td class="t-value">{{ $reception->details->sum(fn ($d) => $d->detailCommande?->quantite ?? 0) }}</td>
                 </tr>
                 <tr>
-                    <td class="t-label">Remise facture</td>
-                    <td class="t-value">{{ number_format($commande->remise_facture, 2) }} %</td>
+                    <td class="t-label">Total quantité reçue</td>
+                    <td class="t-value">{{ $reception->qte_totale_recue }}</td>
                 </tr>
                 <tr>
-                    <td class="t-label">Taxe</td>
-                    <td class="t-value">{{ number_format($commande->detailCommandes->sum(fn($d) => ($d->pu_achat_HT * $d->tax / 100) * $d->quantite), 2) }} EUR</td>
+                    <td class="t-label">Total quantité invendable</td>
+                    <td class="t-value">{{ $reception->qte_totale_invendable }}</td>
                 </tr>
                 <tr class="grand-total">
-                    <td>TOTAL</td>
-                    <td class="t-value">{{ number_format($bonCommande->montant_commande, 2) }} EUR</td>
+                    <td>Total quantité vendable</td>
+                    <td class="t-value">{{ $reception->qte_totale_recue - $reception->qte_totale_invendable }}</td>
                 </tr>
             </table>
         </td>
@@ -427,10 +416,7 @@
 </table>
 
 <div class="footer">
-    Généré le {{ now()->locale('fr')->translatedFormat('d F Y \à H:i') }} — {{ $bonCommande->numero }}
-    @if($bonCommande->createdBy?->name)
-        — Pour toute question, contactez {{ $bonCommande->createdBy->name }}
-    @endif
+    Document généré le {{ now()->format('d/m/Y à H:i') }} — {{ $reception->numero_reception }}
 </div>
 
 </body>

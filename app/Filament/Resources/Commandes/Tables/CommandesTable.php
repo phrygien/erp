@@ -25,14 +25,14 @@ class CommandesTable
             ->columns([
                 TextColumn::make('numero_commande')
                     ->label('N° Commande')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable()
                     ->copyable()
                     ->copyMessage('Numéro copié'),
 
                 TextColumn::make('fournisseur.name')
                     ->label('Fournisseur')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable(),
 
                 TextColumn::make('magasin.name')

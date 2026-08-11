@@ -43,9 +43,10 @@ class ReceptionCommande extends Model
     ];
 
     /**
-     * Préfixe utilisé pour la génération du numéro de réception.
+     * Préfixes utilisés pour la génération des numéros.
      */
     protected const NUMERO_PREFIX = 'REC';
+    protected const NUMERO_BL_PREFIX = 'BL';
 
     /* -----------------------------------------------------------
      | Boot
@@ -59,6 +60,10 @@ class ReceptionCommande extends Model
         static::creating(function (self $reception) {
             if (empty($reception->numero_reception)) {
                 $reception->numero_reception = self::genererNumeroReception();
+            }
+
+            if (empty($reception->numero_bl)) {
+                $reception->numero_bl = self::genererNumeroBl();
             }
         });
     }
@@ -112,6 +117,56 @@ class ReceptionCommande extends Model
 
         return $prefix . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Génère un numéro de bon de livraison unique du type BL-2026-0001.
+     * Même logique de verrou pessimiste que pour numero_reception.
+     */
+    protected static function genererNumeroBl(): string
+    {
+        return DB::transaction(function () {
+            $annee = now()->year;
+            $prefix = self::NUMERO_BL_PREFIX . '-' . $annee . '-';
+
+            $dernier = self::where('numero_bl', 'like', $prefix . '%')
+                ->lockForUpdate()
+                ->orderByDesc('numero_bl')
+                ->first();
+
+            $prochainNumero = 1;
+
+            if ($dernier) {
+                $dernierSequence = (int) substr($dernier->numero_bl, strlen($prefix));
+                $prochainNumero = $dernierSequence + 1;
+            }
+
+            return $prefix . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
+        });
+    }
+
+    /**
+     * Aperçu du prochain numéro de BL, sans le réserver.
+     * Utilisé uniquement pour l'affichage côté formulaire.
+     */
+    public static function previewProchainNumeroBl(): string
+    {
+        $annee = now()->year;
+        $prefix = self::NUMERO_BL_PREFIX . '-' . $annee . '-';
+
+        $dernier = self::where('numero_bl', 'like', $prefix . '%')
+            ->orderByDesc('numero_bl')
+            ->first();
+
+        $prochainNumero = 1;
+
+        if ($dernier) {
+            $dernierSequence = (int) substr($dernier->numero_bl, strlen($prefix));
+            $prochainNumero = $dernierSequence + 1;
+        }
+
+        return $prefix . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
+    }
+
     /* -----------------------------------------------------------
      | Relations
      |-----------------------------------------------------------
