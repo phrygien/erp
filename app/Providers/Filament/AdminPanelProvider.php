@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use SpyApp\ThemeEdinburgh\ThemeEdinburghPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,9 +29,10 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
-            ->font('Work Sans')
+            ->font('Bricolage Grotesque')
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->profile(EditProfile::class, isSimple: false)
             ->passwordReset()
@@ -38,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailChangeVerification()
             ->brandLogo(asset('images/img.png'))
             ->colors([
-                'primary' => Color::Rose,
+                'primary' => Color::Indigo,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -69,5 +71,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s');
+        //->plugin(ThemeEdinburghPlugin::make());
     }
 }

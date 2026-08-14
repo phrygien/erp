@@ -27,6 +27,9 @@ class MagasinsTable
                     ->searchable(),
                 IconColumn::make('active')
                     ->boolean(),
+                IconColumn::make('depot_central')
+                    ->label('Dépôt central')
+                    ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

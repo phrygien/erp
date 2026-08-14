@@ -12,6 +12,7 @@
         "filament/filament": "^5.7",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
+        "spykapps/theme-edinburgh": "^1.0",
         "torgodly/html2media": "^2.1"
     },
     "require-dev": {

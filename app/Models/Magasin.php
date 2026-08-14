@@ -15,6 +15,7 @@ class Magasin extends Model
         'telephone',
         'email',
         'active',
+        'depot_central'
     ];
 
     protected $casts = [
