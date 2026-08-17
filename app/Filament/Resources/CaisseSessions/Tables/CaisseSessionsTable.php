@@ -54,13 +54,13 @@ class CaisseSessionsTable
                 TextColumn::make('solde_ouverture')
                     ->label('Solde ouverture')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR')
+                    ->suffix(' MUR')
                     ->sortable(),
 
                 TextColumn::make('solde_cloture_theorique')
                     ->label('Théorique')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR')
+                    ->suffix(' MUR')
                     ->sortable()
                     ->placeholder('-')
                     ->toggleable(),
@@ -68,14 +68,14 @@ class CaisseSessionsTable
                 TextColumn::make('solde_cloture_reel')
                     ->label('Réel')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR')
+                    ->suffix(' MUR')
                     ->sortable()
                     ->placeholder('-'),
 
                 TextColumn::make('ecart')
                     ->label('Écart')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR')
+                    ->suffix(' MUR')
                     ->sortable()
                     ->placeholder('-')
                     ->badge()
@@ -138,6 +138,13 @@ class CaisseSessionsTable
             ->recordActions([
                 ViewAction::make(),
 
+                Action::make('ouvrirPos')
+                    ->label('Ouvrir POS')
+                    ->icon(Heroicon::OutlinedShoppingCart)
+                    ->color('primary')
+                    ->visible(fn (CaisseSession $record): bool => $record->estOuverte())
+                    ->url(fn (CaisseSession $record): string => \App\Filament\Pages\PosCaisse::getUrl(['caisseSessionId' => $record->id])),
+
                 // Une session fermée est un enregistrement figé, au même
                 // titre qu'une facture payée : la rouvrir en édition
                 // fausserait un rapprochement déjà effectué.
@@ -197,7 +204,7 @@ class CaisseSessionsTable
                             ->title('Session clôturée')
                             ->body($ecart === 0.0
                                 ? 'Aucun écart constaté.'
-                                : 'Écart constaté : ' . number_format($ecart, 2) . ' EUR.')
+                                : 'Écart constaté : ' . number_format($ecart, 2) . ' MUR.')
                             ->color($ecart === 0.0 ? 'success' : 'warning')
                             ->send();
                     }),

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Table(name: 'products')]
 class Product extends Model
@@ -46,5 +47,14 @@ class Product extends Model
     public function ligne(): BelongsTo
     {
         return $this->belongsTo(Ligne::class);
+    }
+
+    /**
+     * Un produit n'a qu'un seul enregistrement de stock (mono-dépôt, voir
+     * migration stocks : product_id est unique).
+     */
+    public function stock(): HasOne
+    {
+        return $this->hasOne(Stock::class);
     }
 }

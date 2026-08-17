@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class StockMouvement extends Model
 {
+    /**
+     * Valeurs autorisées pour la colonne `type`. Centralisées ici pour
+     * éviter les chaînes magiques dispersées (entrees/ajustements/sorties)
+     * et les fautes de frappe qui provoquaient l'échec du CHECK constraint
+     * (ex: 'sortie' non déclaré dans l'enum d'origine de la migration).
+     */
+    public const TYPE_ENTREE = 'entree';
+
+    public const TYPE_SORTIE = 'sortie';
+
+    public const TYPE_AJUSTEMENT = 'ajustement';
+
     protected $fillable = [
         'product_id',
         'stock_lot_id',
@@ -68,12 +80,17 @@ class StockMouvement extends Model
 
     public function scopeEntrees(Builder $query): Builder
     {
-        return $query->where('type', 'entree');
+        return $query->where('type', self::TYPE_ENTREE);
+    }
+
+    public function scopeSorties(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_SORTIE);
     }
 
     public function scopeAjustements(Builder $query): Builder
     {
-        return $query->where('type', 'ajustement');
+        return $query->where('type', self::TYPE_AJUSTEMENT);
     }
 
     public function scopePourProduit(Builder $query, int $productId): Builder
@@ -111,7 +128,7 @@ class StockMouvement extends Model
         return self::create([
             'product_id' => $stock->product_id,
             'stock_lot_id' => $stockLot?->id,
-            'type' => 'entree',
+            'type' => self::TYPE_ENTREE,
             'quantite' => $quantite,
             'quantite_avant' => $avant,
             'quantite_apres' => $apres,
@@ -147,10 +164,41 @@ class StockMouvement extends Model
         return self::create([
             'product_id' => $stock->product_id,
             'stock_lot_id' => null,
-            'type' => 'ajustement',
+            'type' => self::TYPE_AJUSTEMENT,
             'quantite' => abs($delta),
             'quantite_avant' => $avant,
             'quantite_apres' => $nouvelleQuantite,
+            'date_mouvement' => $dateMouvement ?? now()->toDateString(),
+            'commentaire' => $commentaire,
+        ]);
+    }
+
+    /**
+     * Enregistre un mouvement de sortie (vente) : décrémente le lot ciblé
+     * (respect du FIFO, le lot doit avoir déjà été choisi par l'appelant),
+     * décrémente le Stock global du même delta, et journalise le mouvement.
+     */
+    public static function enregistrerSortie(
+        Stock $stock,
+        StockLot $stockLot,
+        int $quantite,
+        ?string $dateMouvement = null,
+        ?string $commentaire = null,
+    ): self {
+        $stockLot->consommer($quantite);
+
+        $avant = $stock->quantite;
+        $apres = max(0, $avant - $quantite);
+
+        $stock->update(['quantite' => $apres]);
+
+        return self::create([
+            'product_id' => $stock->product_id,
+            'stock_lot_id' => $stockLot->id,
+            'type' => self::TYPE_SORTIE,
+            'quantite' => $quantite,
+            'quantite_avant' => $avant,
+            'quantite_apres' => $apres,
             'date_mouvement' => $dateMouvement ?? now()->toDateString(),
             'commentaire' => $commentaire,
         ]);

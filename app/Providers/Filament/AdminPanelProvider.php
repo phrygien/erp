@@ -20,7 +20,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use SpyApp\ThemeEdinburgh\ThemeEdinburghPlugin;
+use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             //->font('Josefin Sans')
             ->id('admin')
             ->path('admin')
-            //->viteTheme('resources/css/filament/admin/theme.css')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->profile(EditProfile::class, isSimple: false)
             ->passwordReset()
@@ -67,7 +67,8 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make()
+                FilamentShieldPlugin::make(),
+                SpotlightPlugin::make(),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s');
