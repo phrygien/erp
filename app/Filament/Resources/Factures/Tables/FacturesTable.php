@@ -193,7 +193,11 @@ class FacturesTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
+
+                    // Une facture payée est figée : la modifier après coup
+                    // fausserait un document déjà réconcilié comptablement.
+                    EditAction::make()
+                        ->visible(fn (Facture $record): bool => $record->statut !== 'paye'),
 
                     Action::make('pdf')
                         ->label('Facture PDF')

@@ -7,6 +7,7 @@ use App\Filament\Resources\Factures\Pages\EditFacture;
 use App\Filament\Resources\Factures\Pages\ListFactures;
 use App\Filament\Resources\Factures\Pages\ViewFacture;
 use App\Filament\Resources\Factures\RelationManagers\DetailFacturesRelationManager;
+use App\Filament\Resources\Factures\RelationManagers\StatusHistoriesRelationManager;
 use App\Filament\Resources\Factures\Schemas\FactureForm;
 use App\Filament\Resources\Factures\Schemas\FactureInfolist;
 use App\Filament\Resources\Factures\Tables\FacturesTable;
@@ -46,7 +47,8 @@ class FactureResource extends Resource
     public static function getRelations(): array
     {
         return [
-            DetailFacturesRelationManager::class
+            DetailFacturesRelationManager::class,
+            StatusHistoriesRelationManager::class
         ];
     }
 

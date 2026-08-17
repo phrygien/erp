@@ -29,10 +29,10 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
-            ->font('Bricolage Grotesque')
+            //->font('Josefin Sans')
             ->id('admin')
             ->path('admin')
-            ->viteTheme('resources/css/filament/admin/theme.css')
+            //->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->profile(EditProfile::class, isSimple: false)
             ->passwordReset()
@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailChangeVerification()
             ->brandLogo(asset('images/img.png'))
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => Color::Pink,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

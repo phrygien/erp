@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Factures\Pages;
 
 use App\Filament\Resources\Factures\FactureResource;
+use App\Models\Facture;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -13,7 +14,8 @@ class ViewFacture extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+            ->visible(fn (Facture $record): bool => $record->statut !== 'paye'),
         ];
     }
 }
