@@ -22,6 +22,9 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 
+use Filament\Support\Icons\Heroicon;
+use Ipatco\FilamentProfile\FilamentProfilePlugin;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -29,18 +32,18 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
-            //->font('Josefin Sans')
+            ->font('Urbanist')
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            ->profile(EditProfile::class, isSimple: false)
+            //->profile(EditProfile::class, isSimple: false)
             ->passwordReset()
             ->emailVerification()
             ->emailChangeVerification()
             ->brandLogo(asset('images/img.png'))
             ->colors([
-                'primary' => Color::Pink,
+                'primary' => Color::Indigo,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -69,6 +72,10 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 SpotlightPlugin::make(),
+                FilamentProfilePlugin::make()
+                    ->showOnDropdown()
+                    ->icon(Heroicon::OutlinedUserCircle)
+                    ->label('Profile'),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s');

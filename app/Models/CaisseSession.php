@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 class CaisseSession extends Model
@@ -105,5 +106,10 @@ class CaisseSession extends Model
     public function scopePourDate($query, string $date)
     {
         return $query->whereDate('date_session', $date);
+    }
+
+    public function ventes(): HasMany
+    {
+        return $this->hasMany(Vente::class, 'caisse_session_id');
     }
 }

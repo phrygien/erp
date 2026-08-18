@@ -8,31 +8,26 @@ use App\Models\Stock;
 use App\Models\StockLot;
 use App\Models\StockMouvement;
 use App\Models\Vente;
-use Filament\Actions\Action;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Width;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class PosCaisse extends Page implements HasTable, HasSchemas
+class PosCaisse extends Page implements HasSchemas
 {
-    use InteractsWithTable;
     use InteractsWithSchemas;
 
     protected static bool $shouldRegisterNavigation = false;
 
     protected string $view = 'filament.pages.pos-caisse';
-
-    //protected Width|string|null $maxContentWidth = Width::Full;
 
     public int $caisseSessionId;
 
@@ -51,9 +46,19 @@ class PosCaisse extends Page implements HasTable, HasSchemas
     protected int $searchLimit = 8;
 
     /**
+     * Source de vérité du panier, keyée par product_id. Le Repeater
+     * (cartForm) en est une représentation éditable, resynchronisée dans
+     * les deux sens via syncCartForm() / syncCartFromRepeaterState().
+     *
      * @var array<int, array{product_id:int, product_code:string, designation:string, prix:float, quantite:int, stock_lot_id:int, max_quantite:int}>
      */
     public array $cart = [];
+
+    /**
+     * State du schema Repeater. Ne pas manipuler directement : passer par
+     * $this->cart puis syncCartForm().
+     */
+    public array $cartData = [];
 
     public string $cashInput = '';
 
@@ -79,72 +84,114 @@ class PosCaisse extends Page implements HasTable, HasSchemas
                 ->send();
 
             $this->redirect(route('filament.admin.resources.caisse-sessions.index'));
+
+            return;
         }
+
+        $this->cartForm->fill(['cart' => []]);
     }
 
-    public function table(Table $table): Table
+    /**
+     * Repeater en layout table (Filament v4) : chaque ligne du panier est
+     * éditable (produit, quantité), avec drag-to-reorder et suppression.
+     * Référencé dans la vue via {{ $this->cartForm }}.
+     */
+    public function cartForm(Schema $schema): Schema
     {
-        return $table
-            ->records(fn (): Collection => collect($this->cart)
-                ->values()
-                ->map(fn (array $item) => [
-                    'id' => $item['product_id'],
-                    ...$item,
-                ]))
-            ->columns([
-                TextColumn::make('designation')
-                    ->label('Produit')
-                    ->weight('medium')
-                    ->description(fn ($record) => $record['product_code']),
+        return $schema
+            ->statePath('cartData')
+            ->components([
+                Repeater::make('cart')
+                    ->hiddenLabel()
+                    ->table([
+                        TableColumn::make('Produit'),
+                        TableColumn::make('Quantité')->width('110px'),
+                        TableColumn::make('Prix unitaire')->width('140px'),
+                    ])
+                    ->schema([
+                        Select::make('product_id')
+                            ->label('Produit')
+                            ->searchable()
+                            ->options(fn () => Product::query()
+                                ->where('state', 'active')
+                                ->limit(50)
+                                ->pluck('designation', 'id'))
+                            ->getSearchResultsUsing(fn (string $search) => Product::query()
+                                ->where('state', 'active')
+                                ->where(fn ($q) => $q
+                                    ->where('designation', 'like', "%{$search}%")
+                                    ->orWhere('product_code', 'like', "%{$search}%")
+                                    ->orWhere('EAN', 'like', "%{$search}%"))
+                                ->limit(20)
+                                ->pluck('designation', 'id'))
+                            ->getOptionLabelUsing(fn ($value) => Product::find($value)?->designation)
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (! $state) {
+                                    return;
+                                }
 
-                TextColumn::make('prix')
-                    ->label('Prix unitaire')
-                    ->formatStateUsing(fn ($state) => number_format($state, 2) . ' EUR'),
+                                $product = Product::find($state);
+                                $lot = StockLot::disponibles()->pourProduit($state)->first();
 
-                TextColumn::make('quantite')
-                    ->label('Quantité')
-                    ->alignCenter(),
+                                if (! $product || ! $lot) {
+                                    Notification::make()
+                                        ->title('Aucun stock disponible pour ce produit.')
+                                        ->warning()
+                                        ->send();
+                                }
 
-                TextColumn::make('total')
-                    ->label('Total')
-                    ->state(fn ($record) => $record['prix'] * $record['quantite'])
-                    ->formatStateUsing(fn ($state) => number_format($state, 2) . ' EUR')
-                    ->weight('semibold')
-                    ->alignEnd(),
-            ])
-            ->recordActions([
-                Action::make('decrementer')
-                    ->label('')
-                    ->icon('heroicon-o-minus')
-                    ->size('sm')
-                    ->color('gray')
-                    ->action(fn ($record) => $this->decrementer($record['product_id'])),
+                                $set('product_code', $product?->product_code);
+                                $set('prix', $product ? (float) $product->pght_parkod : null);
+                                $set('stock_lot_id', $lot?->id);
+                                $set('max_quantite', $lot?->quantite_restante ?? 0);
+                                $set('quantite', 1);
+                            }),
 
-                Action::make('incrementer')
-                    ->label('')
-                    ->icon('heroicon-o-plus')
-                    ->size('sm')
-                    ->color('gray')
-                    ->action(fn ($record) => $this->incrementer($record['product_id'])),
+                        TextInput::make('quantite')
+                            ->label('Quantité')
+                            ->numeric()
+                            ->minValue(1)
+                            ->default(1)
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $max = (int) ($get('max_quantite') ?? 0);
 
-                Action::make('retirer')
-                    ->label('')
-                    ->icon('heroicon-o-x-mark')
-                    ->size('sm')
-                    ->color('danger')
-                    ->action(fn ($record) => $this->retirerDuPanier($record['product_id'])),
-            ])
-            ->emptyStateHeading('Aucun article scanné')
-            ->emptyStateDescription('Scannez un code-barres ou recherchez un produit pour commencer la vente.')
-            ->emptyStateIcon('heroicon-o-shopping-cart')
-            ->paginated(false);
+                                if ($max > 0 && (int) $state > $max) {
+                                    $set('quantite', $max);
+
+                                    Notification::make()
+                                        ->title("Quantité limitée au stock disponible ({$max}).")
+                                        ->warning()
+                                        ->send();
+                                }
+                            }),
+
+                        TextInput::make('prix')
+                            ->label('Prix unitaire')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        Hidden::make('product_code'),
+                        Hidden::make('stock_lot_id'),
+                        Hidden::make('max_quantite'),
+                    ])
+                    ->addActionLabel('Ajouter un article')
+                    ->reorderable()
+                    ->deletable()
+                    ->columnSpanFull()
+                    ->live()
+                    ->afterStateUpdated(fn (?array $state) => $this->syncCartFromRepeaterState($state)),
+            ]);
     }
 
     /**
      * Infolist (v5 : Schema unifié) récapitulatif de la vente en cours :
      * total, espèces reçues et monnaie à rendre. Chaque TextEntry recalcule
-     * son état via une closure, donc pas besoin de ->record() / ->constantState()
-     * ici. Référencé dans la vue via {{ $this->venteInfolist }}.
+     * son état via une closure. Référencé dans la vue via {{ $this->venteInfolist }}.
      */
     public function venteInfolist(Schema $schema): Schema
     {
@@ -188,8 +235,6 @@ class PosCaisse extends Page implements HasTable, HasSchemas
     /**
      * Résultats de recherche produit (code produit, EAN ou désignation),
      * calculés à chaque frappe via wire:model.live sur searchQuery.
-     * Retourne un tableau simple (pas de modèles Eloquent) pour rester
-     * léger côté Livewire wire:snapshot.
      *
      * @return array<int, array{id:int, product_code:string, EAN:?string, designation:string, prix:float, stock_disponible:int}>
      */
@@ -302,7 +347,7 @@ class PosCaisse extends Page implements HasTable, HasSchemas
         if (isset($this->cart[$productId])) {
             if ($this->cart[$productId]['quantite'] < $this->cart[$productId]['max_quantite']) {
                 $this->cart[$productId]['quantite']++;
-                $this->synchroniserCashInputAvecTotal();
+                $this->apresMutationPanier();
             }
 
             return;
@@ -320,7 +365,7 @@ class PosCaisse extends Page implements HasTable, HasSchemas
             'max_quantite' => $lot->quantite_restante,
         ];
 
-        $this->synchroniserCashInputAvecTotal();
+        $this->apresMutationPanier();
     }
 
     public function incrementer(int $productId): void
@@ -331,7 +376,7 @@ class PosCaisse extends Page implements HasTable, HasSchemas
 
         if ($this->cart[$productId]['quantite'] < $this->cart[$productId]['max_quantite']) {
             $this->cart[$productId]['quantite']++;
-            $this->synchroniserCashInputAvecTotal();
+            $this->apresMutationPanier();
         }
     }
 
@@ -347,14 +392,14 @@ class PosCaisse extends Page implements HasTable, HasSchemas
             unset($this->cart[$productId]);
         }
 
-        $this->synchroniserCashInputAvecTotal();
+        $this->apresMutationPanier();
     }
 
     public function retirerDuPanier(int $productId): void
     {
         unset($this->cart[$productId]);
 
-        $this->synchroniserCashInputAvecTotal();
+        $this->apresMutationPanier();
     }
 
     public function ajouterEspeces(int $montant): void
@@ -373,10 +418,81 @@ class PosCaisse extends Page implements HasTable, HasSchemas
         $this->cashInput = $this->total > 0 ? (string) $this->total : '';
     }
 
+    /**
+     * À appeler après toute mutation de $this->cart faite en dehors du
+     * Repeater (scan, recherche, boutons +/-) : recalcule les espèces et
+     * repousse l'état vers le Repeater pour qu'il reste synchronisé.
+     */
+    protected function apresMutationPanier(): void
+    {
+        $this->synchroniserCashInputAvecTotal();
+        $this->syncCartForm();
+    }
+
+    /**
+     * Pousse $this->cart (source de vérité) vers le state du Repeater.
+     */
+    protected function syncCartForm(): void
+    {
+        $this->cartForm->fill([
+            'cart' => array_values($this->cart),
+        ]);
+    }
+
+    /**
+     * Rappelée quand l'utilisateur édite directement une ligne du
+     * Repeater (changement de produit, quantité, réordonnancement,
+     * suppression) : redescend l'état vers $this->cart, en clampant les
+     * quantités au stock disponible du lot sélectionné.
+     */
+    protected function syncCartFromRepeaterState(?array $state): void
+    {
+        $newCart = [];
+
+        foreach ($state ?? [] as $row) {
+            $productId = $row['product_id'] ?? null;
+
+            if (! $productId) {
+                continue;
+            }
+
+            $maxQuantite = (int) ($row['max_quantite'] ?? 0);
+            $quantite = max(1, (int) ($row['quantite'] ?? 1));
+
+            if ($maxQuantite > 0) {
+                $quantite = min($quantite, $maxQuantite);
+            }
+
+            // Si le même produit apparaît sur plusieurs lignes (édition
+            // manuelle), on cumule les quantités plutôt que d'écraser.
+            if (isset($newCart[$productId])) {
+                $newCart[$productId]['quantite'] += $quantite;
+
+                continue;
+            }
+
+            $product = Product::find($productId);
+
+            $newCart[$productId] = [
+                'product_id' => $productId,
+                'product_code' => $row['product_code'] ?? $product?->product_code ?? '',
+                'designation' => $product?->designation ?? '',
+                'prix' => (float) ($row['prix'] ?? $product?->pght_parkod ?? 0),
+                'quantite' => $quantite,
+                'stock_lot_id' => $row['stock_lot_id'] ?? null,
+                'max_quantite' => $maxQuantite,
+            ];
+        }
+
+        $this->cart = $newCart;
+        $this->synchroniserCashInputAvecTotal();
+    }
+
     public function viderPanier(): void
     {
         $this->cart = [];
         $this->cashInput = '';
+        $this->syncCartForm();
     }
 
     public function valider(): void

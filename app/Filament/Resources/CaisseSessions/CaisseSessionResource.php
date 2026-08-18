@@ -6,6 +6,7 @@ use App\Filament\Resources\CaisseSessions\Pages\CreateCaisseSession;
 use App\Filament\Resources\CaisseSessions\Pages\EditCaisseSession;
 use App\Filament\Resources\CaisseSessions\Pages\ListCaisseSessions;
 use App\Filament\Resources\CaisseSessions\Pages\ViewCaisseSession;
+use App\Filament\Resources\CaisseSessions\RelationManagers\VentesRelationManager;
 use App\Filament\Resources\CaisseSessions\Schemas\CaisseSessionForm;
 use App\Filament\Resources\CaisseSessions\Schemas\CaisseSessionInfolist;
 use App\Filament\Resources\CaisseSessions\Tables\CaisseSessionsTable;
@@ -43,7 +44,7 @@ class CaisseSessionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            VentesRelationManager::class
         ];
     }
 

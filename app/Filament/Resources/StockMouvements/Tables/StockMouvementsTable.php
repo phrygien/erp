@@ -73,6 +73,7 @@ class StockMouvementsTable
                 TextColumn::make('receptionCommande.numero_reception')
                     ->label('N° réception')
                     ->searchable()
+                    ->toggleable()
                     ->placeholder('-'),
 
                 TextColumn::make('stockLot.id')

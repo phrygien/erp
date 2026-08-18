@@ -10,6 +10,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^4.3",
         "filament/filament": "^5.7",
+        "ipatco/filament-profile": "^1.0",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
         "pxlrbt/filament-spotlight": "^2.1",

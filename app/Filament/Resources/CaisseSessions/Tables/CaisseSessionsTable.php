@@ -25,10 +25,13 @@ class CaisseSessionsTable
     {
         return $table
             ->columns([
+                // --- 5 colonnes principales, toujours visibles ---
+
                 TextColumn::make('caisse.name')
                     ->label('Caisse')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('medium'),
 
                 TextColumn::make('responsable.name')
                     ->label('Responsable')
@@ -37,55 +40,11 @@ class CaisseSessionsTable
 
                 TextColumn::make('date_session')
                     ->label('Date')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
-
-                TextColumn::make('ouverte_le')
-                    ->label('Ouverte le')
-                    ->dateTime()
-                    ->sortable(),
-
-                TextColumn::make('fermee_le')
-                    ->label('Fermée le')
-                    ->dateTime()
-                    ->sortable()
-                    ->placeholder('-'),
-
-                TextColumn::make('solde_ouverture')
-                    ->label('Solde ouverture')
-                    ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR')
-                    ->sortable(),
-
-                TextColumn::make('solde_cloture_theorique')
-                    ->label('Théorique')
-                    ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR')
-                    ->sortable()
-                    ->placeholder('-')
-                    ->toggleable(),
-
-                TextColumn::make('solde_cloture_reel')
-                    ->label('Réel')
-                    ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR')
-                    ->sortable()
-                    ->placeholder('-'),
-
-                TextColumn::make('ecart')
-                    ->label('Écart')
-                    ->numeric(decimalPlaces: 2)
-                    ->suffix(' MUR')
-                    ->sortable()
-                    ->placeholder('-')
-                    ->badge()
-                    ->color(fn (?string $state): string => match (true) {
-                        $state === null => 'gray',
-                        (float) $state === 0.0 => 'success',
-                        default => 'danger',
-                    }),
 
                 TextColumn::make('statut')
+                    ->label('Statut')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'ouverte' => 'success',
@@ -98,6 +57,57 @@ class CaisseSessionsTable
                         default => $state,
                     })
                     ->sortable(),
+
+                TextColumn::make('ecart')
+                    ->label('Écart')
+                    ->numeric(decimalPlaces: 2)
+                    ->suffix(' EUR')
+                    ->sortable()
+                    ->placeholder('-')
+                    ->badge()
+                    ->color(fn (?string $state): string => match (true) {
+                        $state === null => 'gray',
+                        (float) $state === 0.0 => 'success',
+                        default => 'danger',
+                    }),
+
+                // --- Colonnes secondaires, masquées par défaut ---
+
+                TextColumn::make('ouverte_le')
+                    ->label('Ouverte le')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('fermee_le')
+                    ->label('Fermée le')
+                    ->dateTime()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('solde_ouverture')
+                    ->label('Solde ouverture')
+                    ->numeric(decimalPlaces: 2)
+                    ->suffix(' EUR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('solde_cloture_theorique')
+                    ->label('Théorique')
+                    ->numeric(decimalPlaces: 2)
+                    ->suffix(' EUR')
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('solde_cloture_reel')
+                    ->label('Réel')
+                    ->numeric(decimalPlaces: 2)
+                    ->suffix(' EUR')
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -145,9 +155,6 @@ class CaisseSessionsTable
                     ->visible(fn (CaisseSession $record): bool => $record->estOuverte())
                     ->url(fn (CaisseSession $record): string => \App\Filament\Pages\PosCaisse::getUrl(['caisseSessionId' => $record->id])),
 
-                // Une session fermée est un enregistrement figé, au même
-                // titre qu'une facture payée : la rouvrir en édition
-                // fausserait un rapprochement déjà effectué.
                 EditAction::make()
                     ->visible(fn (CaisseSession $record): bool => $record->estOuverte()),
 
@@ -160,11 +167,6 @@ class CaisseSessionsTable
                     ->modalHeading('Clôturer la session de caisse')
                     ->modalDescription('Cette action fige la session : elle ne pourra plus être modifiée ensuite.')
                     ->schema([
-                        // Pas de calcul automatique du solde théorique tant
-                        // que caisse_mouvements n'existe pas : il faut le
-                        // saisir manuellement pour l'instant. Une fois cette
-                        // table en place, ce champ pourra être pré-rempli et
-                        // rendu readOnly plutôt que saisi à la main.
                         TextInput::make('solde_cloture_theorique')
                             ->label('Solde théorique')
                             ->numeric()
@@ -204,7 +206,7 @@ class CaisseSessionsTable
                             ->title('Session clôturée')
                             ->body($ecart === 0.0
                                 ? 'Aucun écart constaté.'
-                                : 'Écart constaté : ' . number_format($ecart, 2) . ' MUR.')
+                                : 'Écart constaté : ' . number_format($ecart, 2) . ' EUR.')
                             ->color($ecart === 0.0 ? 'success' : 'warning')
                             ->send();
                     }),
