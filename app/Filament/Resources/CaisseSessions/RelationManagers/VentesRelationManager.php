@@ -16,37 +16,29 @@ class VentesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('id')
+            ->recordTitleAttribute('numero_vente')
             ->columns([
-                TextColumn::make('product.designation')
-                    ->label('Produit')
+                TextColumn::make('numero_vente')
+                    ->label('N° de vente')
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('product.EAN')
-                    ->label('EAN')
-                    ->searchable()
-                    ->copyable(),
-
-                TextColumn::make('quantite')
-                    ->label('Quantité')
+                TextColumn::make('details_count')
+                    ->label('Nb articles')
+                    ->counts('details')
                     ->numeric()
                     ->alignCenter()
-                    ->sortable()
-                    ->summarize(
-                        Sum::make()
-                            ->label('Total')
-                    ),
+                    ->sortable(),
 
-                TextColumn::make('montant_total_ht_vente')
-                    ->label('Total HT')
+                TextColumn::make('montant_total')
+                    ->label('Total')
                     ->numeric(decimalPlaces: 2)
                     ->suffix(' EUR')
                     ->sortable()
                     ->weight('semibold')
                     ->summarize(
                         Sum::make()
-                            ->label('Total HT')
+                            ->label('Total')
                             ->numeric(decimalPlaces: 2)
                             ->suffix(' EUR')
                     ),

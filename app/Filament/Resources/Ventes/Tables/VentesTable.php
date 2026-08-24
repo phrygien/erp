@@ -3,18 +3,16 @@
 namespace App\Filament\Resources\Ventes\Tables;
 
 use App\Filament\Exports\VenteExporter;
-use App\Models\Caisse;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ExportBulkAction;
-use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder;
 
 class VentesTable
 {
@@ -22,91 +20,52 @@ class VentesTable
     {
         return $table
             ->columns([
-                TextColumn::make('product.designation')
-                    ->label('Produit')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('product.EAN')
-                    ->label('EAN')
-                    ->searchable()
-                    ->copyable(),
+                TextColumn::make('numero_vente')
+                    ->searchable(),
                 TextColumn::make('magasin.name')
                     ->searchable(),
-                TextColumn::make('canal_vente')
-                    ->searchable(),
-                TextColumn::make('caisseSession.caisse.name')
+                TextColumn::make('caisseSession.caisse.numero_caisse')
                     ->label('Caisse')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('-'),
-                TextColumn::make('quantite')
+                    ->searchable(),
+                TextColumn::make('details_count')
+                    ->label('Nb articles')
+                    ->counts('details')
                     ->numeric()
-                    ->sortable()
-                    ->summarize(
-                        Sum::make()
-                            ->label('Total')
-                    ),
-                TextColumn::make('montant_total_ht_vente')
-                    ->numeric()
-                    ->sortable()
-                    ->summarize(
-                        Sum::make()
-                            ->label('Total HT')
-                            ->numeric(decimalPlaces: 2)
-                            ->suffix(' EUR')
-                    ),
+                    ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Date de vente')
+                    ->formatStateUsing(fn ($state) => $state?->locale('fr')->isoFormat('D MMMM, YYYY'))
+                    ->sortable(),
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('montant_total')
+                    ->numeric()
+                    ->sortable()
+                    ->summarize([
+                        Sum::make()->label('This page'),
+                        Sum::make()
+                            ->label('All orders')
+                            ->query(fn (Builder $query) => $query),
+                    ]),
             ])
             ->filters([
-                SelectFilter::make('magasin_id')
-                    ->label('Magasin')
-                    ->relationship('magasin', 'name')
-                    ->searchable()
-                    ->preload(),
-
-                // Pas de relation directe caisse sur Vente (elle passe par
-                // caisseSession), donc filtre manuel via whereHas plutôt
-                // que SelectFilter::relationship().
-                SelectFilter::make('caisse_id')
-                    ->label('Caisse')
-                    ->options(fn () => Caisse::query()->pluck('name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['value'],
-                            fn (Builder $q, $caisseId) => $q->whereHas(
-                                'caisseSession',
-                                fn (Builder $sq) => $sq->where('caisse_id', $caisseId)
-                            )
-                        );
-                    }),
+                //
             ])
             ->headerActions([
                 ExportAction::make()
-                    ->label('Exporter')
-                    ->exporter(VenteExporter::class)
-                    ->formats([
-                        ExportFormat::Xlsx,
-                        ExportFormat::Csv,
-                    ]),
+                    ->exporter(VenteExporter::class),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    //DeleteBulkAction::make(),
                     ExportBulkAction::make()
-                        ->label('Exporter la sélection')
                         ->exporter(VenteExporter::class),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

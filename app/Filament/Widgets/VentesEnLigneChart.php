@@ -86,7 +86,7 @@ class VentesEnLigneChart extends ChartWidget
         $grouped = $ventes->groupBy(
             fn (Vente $vente) => Carbon::parse($vente->created_at)->format($groupFormat)
         )->map(
-            fn ($group) => (float) $group->sum('montant_total_ht_vente')
+            fn ($group) => (float) $group->sum('montant_total')
         );
 
         $result = [];

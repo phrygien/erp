@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\CaisseSession;
+use App\Models\DetailVente;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockLot;
@@ -495,6 +496,12 @@ class PosCaisse extends Page implements HasSchemas
         $this->syncCartForm();
     }
 
+    /**
+     * Valide la vente en cours : crée UNE Vente (en-tête de transaction)
+     * puis UNE ligne DetailVente par article du panier — c'est le
+     * Repeater (cartForm / $this->cart) qui alimente directement ces
+     * lignes détail, plus aucune Vente n'est créée par article.
+     */
     public function valider(): void
     {
         if (empty($this->cart)) {
@@ -513,6 +520,16 @@ class PosCaisse extends Page implements HasSchemas
 
         try {
             DB::transaction(function () {
+                // En-tête de la transaction. montant_total est la somme
+                // des lignes détail créées juste après ; numero_vente est
+                // généré automatiquement par Vente::creating().
+                $vente = Vente::creerAvecNumeroUnique([
+                    'magasin_id' => $this->session->caisse->magasin_id,
+                    'canal_vente' => Vente::CANAL_CAISSE,
+                    'caisse_session_id' => $this->session->id,
+                    'montant_total' => round($this->total, 2),
+                ]);
+
                 foreach ($this->cart as $item) {
                     $lot = StockLot::lockForUpdate()->findOrFail($item['stock_lot_id']);
 
@@ -520,14 +537,17 @@ class PosCaisse extends Page implements HasSchemas
                         throw new \RuntimeException("Stock insuffisant pour {$item['designation']} (quelqu'un d'autre a peut-être vendu ce lot entre-temps).");
                     }
 
-                    $vente = Vente::create([
+                    // Chaque ligne du panier (= chaque ligne du Repeater)
+                    // devient une ligne details_ventes rattachée à cette
+                    // Vente, avec son propre lot FIFO, sa quantité et son
+                    // prix au moment de la vente.
+                    DetailVente::create([
+                        'vente_id' => $vente->id,
                         'product_id' => $item['product_id'],
-                        'magasin_id' => $this->session->caisse->magasin_id,
                         'stock_lot_id' => $lot->id,
-                        'canal_vente' => Vente::CANAL_CAISSE,
-                        'caisse_session_id' => $this->session->id,
                         'quantite' => $item['quantite'],
-                        'montant_total_ht_vente' => round($item['prix'] * $item['quantite'], 2),
+                        'prix_unitaire' => $item['prix'],
+                        'montant_total_ligne' => round($item['prix'] * $item['quantite'], 2),
                     ]);
 
                     $stock = Stock::where('product_id', $item['product_id'])->lockForUpdate()->firstOrFail();
@@ -536,7 +556,7 @@ class PosCaisse extends Page implements HasSchemas
                         stock: $stock,
                         stockLot: $lot,
                         quantite: $item['quantite'],
-                        commentaire: "Vente #{$vente->id} — session {$this->session->id}",
+                        commentaire: "Vente {$vente->numero_vente} — session {$this->session->id}",
                     );
                 }
             });

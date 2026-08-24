@@ -17,11 +17,8 @@ class VenteExporter extends Exporter
             ExportColumn::make('id')
                 ->label('ID'),
 
-            ExportColumn::make('product.designation')
-                ->label('Produit'),
-
-            ExportColumn::make('product.EAN')
-                ->label('EAN'),
+            ExportColumn::make('numero_vente')
+                ->label('N° de vente'),
 
             ExportColumn::make('magasin.name')
                 ->label('Magasin'),
@@ -35,11 +32,22 @@ class VenteExporter extends Exporter
             ExportColumn::make('caisseSession.responsable.name')
                 ->label('Responsable caisse'),
 
-            ExportColumn::make('quantite')
-                ->label('Quantité'),
+            // Une Vente porte désormais plusieurs produits (une ligne par
+            // article dans details_ventes) : product/EAN/quantite ne sont
+            // plus des colonnes de Vente. On exporte à la place un résumé
+            // (nombre d'articles distincts, quantité totale) au niveau de
+            // la transaction ; pour le détail ligne par ligne, voir
+            // DetailVenteExporter.
+            ExportColumn::make('nombre_articles')
+                ->label('Nombre d\'articles')
+                ->state(fn (Vente $record) => $record->details()->count()),
 
-            ExportColumn::make('montant_total_ht_vente')
-                ->label('Total HT (EUR)'),
+            ExportColumn::make('quantite_totale')
+                ->label('Quantité totale')
+                ->state(fn (Vente $record) => $record->details()->sum('quantite')),
+
+            ExportColumn::make('montant_total')
+                ->label('Total (EUR)'),
 
             ExportColumn::make('created_at')
                 ->label('Date de vente'),

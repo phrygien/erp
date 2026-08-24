@@ -15,7 +15,7 @@ class VentesParMagasinChart extends ChartWidget
 
     protected ?string $maxHeight = '300px';
 
-    public ?string $filter = 'month';
+    public ?string $filter = 'week';
 
     /**
      * Palette cyclique appliquée aux magasins, dans l'ordre de leur id.
@@ -107,7 +107,7 @@ class VentesParMagasinChart extends ChartWidget
         $grouped = $ventes->groupBy(
             fn (Vente $vente) => Carbon::parse($vente->created_at)->format($groupFormat)
         )->map(
-            fn ($group) => (float) $group->sum('montant_total_ht_vente')
+            fn ($group) => (float) $group->sum('montant_total')
         );
 
         $result = [];
