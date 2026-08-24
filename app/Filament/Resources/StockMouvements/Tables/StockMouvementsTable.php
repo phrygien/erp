@@ -38,12 +38,12 @@ class StockMouvementsTable
 
                 TextColumn::make('product.product_code')
                     ->label('Code produit')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable(),
 
                 TextColumn::make('product.EAN')
                     ->label('EAN')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable()
                     ->wrap(),
 

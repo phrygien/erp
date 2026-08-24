@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
-            ->font('Urbanist')
+            ->font('Josefin Sans')
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailChangeVerification()
             ->brandLogo(asset('images/img.png'))
             ->colors([
-                'primary' => Color::Rose,
+                'primary' => Color::Blue,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

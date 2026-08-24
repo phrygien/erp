@@ -31,12 +31,12 @@ class StocksTable
             ->columns([
                 TextColumn::make('product.product_code')
                     ->label('Code produit')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable(),
 
                 TextColumn::make('product.EAN')
                     ->label('EAN')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->toggleable(),
 
                 TextColumn::make('product.designation')
@@ -90,6 +90,7 @@ class StocksTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->persistSortInSession(true)
             ->defaultSort('quantite')
             ->filters([
                 SelectFilter::make('product.category_id')
