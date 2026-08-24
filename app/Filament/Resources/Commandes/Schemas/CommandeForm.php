@@ -177,7 +177,7 @@ class CommandeForm
                                             $remise = (float) ($get('taux_remise') ?? 0);
                                             $net = $ht + ($ht * $tax / 100) - ($ht * $remise / 100);
 
-                                            return number_format($net, 2) . ' MUR';
+                                            return number_format($net, 2) . ' EUR';
                                         }),
                                 ])
                                 ->extraItemActions([

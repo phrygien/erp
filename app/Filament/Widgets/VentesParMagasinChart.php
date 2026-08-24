@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 
 class VentesParMagasinChart extends ChartWidget
 {
+    protected static ?int $sort = 4;
     protected ?string $heading = 'Ventes par magasin';
 
     protected int|string|array $columnSpan = 'full';

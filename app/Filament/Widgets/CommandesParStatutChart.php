@@ -7,6 +7,8 @@ use Filament\Widgets\ChartWidget;
 
 class CommandesParStatutChart extends ChartWidget
 {
+    protected static ?int $sort = 6;
+
     protected ?string $heading = 'Commandes par statut';
 
     protected function getData(): array

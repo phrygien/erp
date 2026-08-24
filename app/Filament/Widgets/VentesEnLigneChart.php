@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 
 class VentesEnLigneChart extends ChartWidget
 {
+    protected static ?int $sort = 3;
     protected ?string $heading = 'Ventes en ligne';
 
     protected string $color = 'info';

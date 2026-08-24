@@ -7,6 +7,8 @@ use Filament\Widgets\ChartWidget;
 
 class CommandesLineChart extends ChartWidget
 {
+    protected static ?int $sort = 5;
+
     protected ?string $heading = 'Évolution des commandes';
 
     protected function getData(): array

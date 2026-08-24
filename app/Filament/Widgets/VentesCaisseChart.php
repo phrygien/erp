@@ -13,7 +13,7 @@ class VentesCaisseChart extends ChartWidget
     protected string $color = 'warning';
 
     public ?string $filter = 'month';
-
+    protected static ?int $sort = 2;
     protected function getFilters(): ?array
     {
         return [
