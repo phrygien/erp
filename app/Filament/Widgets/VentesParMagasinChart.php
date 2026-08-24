@@ -62,6 +62,9 @@ class VentesParMagasinChart extends ChartWidget
                 'data' => array_values($data),
                 'borderColor' => $couleur,
                 'backgroundColor' => $couleur . '33',
+                'tension' => 0.4,
+                'fill' => false,
+                'pointRadius' => 2,
             ];
         })->all();
 
@@ -74,6 +77,17 @@ class VentesParMagasinChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'elements' => [
+                'line' => [
+                    'tension' => 0.4,
+                ],
+            ],
+        ];
     }
 
     protected function getPeriodConfig(): array

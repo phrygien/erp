@@ -30,12 +30,16 @@ class CommandesParStatutChart extends ChartWidget
                 [
                     'label' => 'Commandes',
                     'data' => $counts->values()->all(),
+                    'borderColor' => '#6b7280',
                     'backgroundColor' => [
                         '#6b7280', // gris - créé
                         '#f59e0b', // warning - facturée
                         '#22c55e', // success - clôturée
                         '#ef4444', // danger - annulé
                     ],
+                    'tension' => 0.4,
+                    'fill' => false,
+                    'pointRadius' => 3,
                 ],
             ],
             'labels' => array_values($statuts),
@@ -45,5 +49,16 @@ class CommandesParStatutChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'elements' => [
+                'line' => [
+                    'tension' => 0.4,
+                ],
+            ],
+        ];
     }
 }

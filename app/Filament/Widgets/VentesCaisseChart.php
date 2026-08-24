@@ -41,6 +41,9 @@ class VentesCaisseChart extends ChartWidget
                     'data' => array_values($data),
                     'borderColor' => '#FF9F40',
                     'backgroundColor' => '#FF9F4033',
+                    'tension' => 0.4,
+                    'fill' => false,
+                    'pointRadius' => 2,
                 ],
             ],
             'labels' => array_keys($labels),
@@ -50,6 +53,17 @@ class VentesCaisseChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'elements' => [
+                'line' => [
+                    'tension' => 0.4,
+                ],
+            ],
+        ];
     }
 
     protected function getPeriodConfig(): array
