@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
+use App\Http\Middleware\SetLocale;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -25,6 +26,8 @@ use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 use Filament\Support\Icons\Heroicon;
 use Ipatco\FilamentProfile\FilamentProfilePlugin;
 
+use Filament\View\PanelsRenderHook;
+use App\Livewire\LanguageSwitcher;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -64,6 +67,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetLocale::class
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -77,7 +81,11 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Profile'),
             ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling('30s');
+            ->databaseNotificationsPolling('30s')
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn () => \Livewire\Livewire::mount(LanguageSwitcher::class),
+            );
         //->plugin(ThemeEdinburghPlugin::make());
     }
 }

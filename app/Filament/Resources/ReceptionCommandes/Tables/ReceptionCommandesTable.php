@@ -25,7 +25,6 @@ class ReceptionCommandesTable
                     ->label('N° réception')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold')
                     ->copyable(),
 
                 TextColumn::make('commande.numero_commande')

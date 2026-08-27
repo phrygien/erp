@@ -78,9 +78,21 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'fr'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | Langues disponibles dans l'application (utilisé par le middleware
+    | SetLocale et le sélecteur de langue Filament).
+    |
+    */
+
+    'available_locales' => ['fr', 'en'],
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
