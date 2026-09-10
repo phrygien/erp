@@ -9,7 +9,7 @@ return [
         'heading' => '認証アプリの設定',
 
         'description' => <<<'BLADE'
-            この設定を完了するには、Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS版</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android版</x-filament::link>) などの認証アプリが必要です。
+            この設定を完了するには、Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS版</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android版</x-filamentOld::link>) などの認証アプリが必要です。
             BLADE,
 
         'content' => [
@@ -34,7 +34,7 @@ return [
 
             'recovery_codes' => [
 
-                'instruction' => '以下のリカバリーコードを安全な場所に保存してください。  
+                'instruction' => '以下のリカバリーコードを安全な場所に保存してください。
                     これらは今回のみ表示されますが、認証アプリにアクセスできなくなった場合に必要になります。',
 
             ],

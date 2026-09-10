@@ -9,7 +9,7 @@ return [
         'heading' => '인증 앱 설정',
 
         'description' => <<<'BLADE'
-            이 과정을 완료하려면 Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>)와 같은 앱이 필요합니다.
+            이 과정을 완료하려면 Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>)와 같은 앱이 필요합니다.
             BLADE,
 
         'content' => [

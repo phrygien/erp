@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -77,13 +78,15 @@ class DetailFacturesRelationManager extends RelationManager
                 TextColumn::make('quantite_commande')
                     ->label('Qté commandée')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
 
                 TextColumn::make('quantite_facturee')
                     ->label('Qté facturée')
                     ->numeric()
                     ->sortable()
-                    ->color(fn ($record) => $record->aEcartQuantite() ? 'warning' : null),
+                    ->color(fn ($record) => $record->aEcartQuantite() ? 'warning' : null)
+                    ->summarize(Sum::make()->label('Total')),
 
                 TextColumn::make('prix_unitaire_ht')
                     ->label('P.U. HT')
@@ -93,23 +96,27 @@ class DetailFacturesRelationManager extends RelationManager
                 TextColumn::make('montant_ht')
                     ->label('Montant HT')
                     ->money('EUR')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')->money('EUR')),
 
                 TextColumn::make('montant_remise')
                     ->label('Remise')
                     ->money('EUR')
-                    ->color('danger'),
+                    ->color('danger')
+                    ->summarize(Sum::make()->label('Total')->money('EUR')),
 
                 TextColumn::make('montant_final_ht')
                     ->label('Total HT')
                     ->money('EUR')
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->summarize(Sum::make()->label('Total')->money('EUR')),
 
                 TextColumn::make('montant_final_net')
                     ->label('Total net')
                     ->money('EUR')
                     ->weight('bold')
-                    ->color('primary'),
+                    ->color('primary')
+                    ->summarize(Sum::make()->label('Total')->money('EUR')),
             ])
             ->headerActions([
                 CreateAction::make(),

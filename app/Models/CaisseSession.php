@@ -71,18 +71,32 @@ class CaisseSession extends Model
     }
 
     /**
-     * Clôture la session : fige le comptage physique du responsable, calcule
-     * l'écart par rapport au solde théorique déjà connu à ce moment (à
-     * calculer en amont par le service qui gère les mouvements de caisse,
-     * ce modèle ne les connaît pas), et passe le statut à fermée.
+     * Solde théorique attendu en caisse à l'instant présent : solde
+     * d'ouverture + somme des ventes en caisse rattachées à cette session.
      *
-     * Le solde théorique doit être fourni par l'appelant plutôt que
-     * recalculé ici, car CaisseSession n'a pas connaissance des mouvements
-     * de caisse (encaissements/décaissements) — cette responsabilité
-     * reviendra à un futur CaisseMouvement / service dédié.
+     * Ne prend en compte que les ventes au canal "caisse" (les ventes en
+     * ligne ne transitent jamais par une session physique, voir
+     * Vente::CANAL_EN_LIGNE / la contrainte dans Vente::boot()).
      */
-    public function fermer(float $soldeTheorique, float $soldeReel, ?string $commentaire = null): void
+    public function calculerSoldeTheorique(): float
     {
+        $totalVentes = (float) $this->ventes()
+            ->enCaisse()
+            ->sum('montant_total');
+
+        return (float) $this->solde_ouverture + $totalVentes;
+    }
+
+    /**
+     * Clôture la session : calcule automatiquement le solde théorique à
+     * partir des ventes de la session, fige le comptage physique fourni
+     * par le responsable, calcule l'écart entre les deux, et passe le
+     * statut à fermée.
+     */
+    public function fermer(float $soldeReel, ?string $commentaire = null): void
+    {
+        $soldeTheorique = $this->calculerSoldeTheorique();
+
         $this->update([
             'solde_cloture_theorique' => $soldeTheorique,
             'solde_cloture_reel' => $soldeReel,

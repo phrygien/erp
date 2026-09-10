@@ -30,8 +30,7 @@ class FacturesTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyMessage('Numéro copié')
-                    ->weight('bold'),
+                    ->copyMessage('Numéro copié'),
 
                 TextColumn::make('libelle_facture')
                     ->label('Libellé')
@@ -72,8 +71,7 @@ class FacturesTable
                 TextColumn::make('montant_ttc')
                     ->label('Montant TTC')
                     ->money('EUR')
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
 
                 TextColumn::make('type')
                     ->label('Type')

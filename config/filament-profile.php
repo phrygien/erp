@@ -23,7 +23,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Class that builds the fields in the Profile information section.
-    | Run `php artisan filament-profile:install` to publish an editable copy
+    | Run `php artisan filamentOld-profile:install` to publish an editable copy
     | to app/Filament/Profile/ProfileInformationForm.php, then point this
     | config at that class (the install command does this for you).
     |

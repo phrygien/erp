@@ -9,7 +9,7 @@ return [
         'heading' => 'Танзим кардани барномаи 2FA',
 
         'description' => <<<'BLADE'
-            Барои анҷом додани танзим ба шумо барномае монанди Google Authenticator лозим мешавад (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>).
+            Барои анҷом додани танзим ба шумо барномае монанди Google Authenticator лозим мешавад (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>).
             BLADE,
 
         'content' => [

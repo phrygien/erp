@@ -9,7 +9,7 @@ return [
         'heading' => 'অথেনটিকেটর অ্যাপ সেট আপ করুন',
 
         'description' => <<<'BLADE'
-            এই প্রক্রিয়াটি সম্পন্ন করতে আপনার গুগল অথেনটিকেটর (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) এর মত একটি অ্যাপ প্রয়োজন হবে।
+            এই প্রক্রিয়াটি সম্পন্ন করতে আপনার গুগল অথেনটিকেটর (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) এর মত একটি অ্যাপ প্রয়োজন হবে।
             BLADE,
 
         'content' => [

@@ -9,7 +9,7 @@ return [
         'heading' => 'Įgalinti autentifikavimo programą',
 
         'description' => <<<'BLADE'
-            Jums reikės programos tokios kaip Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) norint užbaigti šį procesą.
+            Jums reikės programos tokios kaip Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) norint užbaigti šį procesą.
             BLADE,
 
         'content' => [

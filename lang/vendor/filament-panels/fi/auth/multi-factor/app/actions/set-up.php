@@ -9,7 +9,7 @@ return [
         'heading' => 'Ota todennussovellus käyttöön',
 
         'description' => <<<'BLADE'
-            Tarvitset sovelluksen kuten Microsoft Authenticator (<x-filament::link href="https://apps.apple.com/fi/app/microsoft-authenticator/id983156458?l=fi" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=fi" target="_blank">Android</x-filament::link>) käyttöönottoa varten.
+            Tarvitset sovelluksen kuten Microsoft Authenticator (<x-filamentOld::link href="https://apps.apple.com/fi/app/microsoft-authenticator/id983156458?l=fi" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=fi" target="_blank">Android</x-filamentOld::link>) käyttöönottoa varten.
             BLADE,
 
         'content' => [

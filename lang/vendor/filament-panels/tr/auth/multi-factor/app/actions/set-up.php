@@ -9,7 +9,7 @@ return [
         'heading' => 'Doğrulama uygulaması kur',
 
         'description' => <<<'BLADE'
-            Devam etmek için Google Authenticator gibi (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) uygulamalardan birine ihtiyacınız olacak.
+            Devam etmek için Google Authenticator gibi (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) uygulamalardan birine ihtiyacınız olacak.
             BLADE,
 
         'content' => [

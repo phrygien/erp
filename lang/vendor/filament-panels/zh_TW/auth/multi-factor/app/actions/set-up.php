@@ -9,7 +9,7 @@ return [
         'heading' => '設定驗證器應用程式',
 
         'description' => <<<'BLADE'
-            您需要像 Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) 這樣的應用程式來完成此過程。
+            您需要像 Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) 這樣的應用程式來完成此過程。
             BLADE,
 
         'content' => [

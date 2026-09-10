@@ -9,7 +9,7 @@ return [
         'heading' => 'Cài đặt ứng dụng xác thực',
 
         'description' => <<<'BLADE'
-            Bạn sẽ cần một ứng dụng như Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) để hoàn tất quá trình này.
+            Bạn sẽ cần một ứng dụng như Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) để hoàn tất quá trình này.
             BLADE,
 
         'content' => [

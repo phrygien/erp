@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -166,12 +167,10 @@ class CaisseSessionsTable
                     ->requiresConfirmation()
                     ->modalHeading('Clôturer la session de caisse')
                     ->modalDescription('Cette action fige la session : elle ne pourra plus être modifiée ensuite.')
-                    ->schema([
-                        TextInput::make('solde_cloture_theorique')
-                            ->label('Solde théorique')
-                            ->numeric()
-                            ->required()
-                            ->helperText('Solde attendu selon les encaissements/décaissements de la journée.'),
+                    ->schema(fn (CaisseSession $record) => [
+                        Placeholder::make('solde_theorique_info')
+                            ->label('Solde théorique (calculé)')
+                            ->content(number_format($record->calculerSoldeTheorique(), 2) . ' EUR'),
 
                         TextInput::make('solde_cloture_reel')
                             ->label('Solde réel (comptage physique)')
@@ -186,7 +185,6 @@ class CaisseSessionsTable
                     ->action(function (CaisseSession $record, array $data) {
                         try {
                             $record->fermer(
-                                soldeTheorique: (float) $data['solde_cloture_theorique'],
                                 soldeReel: (float) $data['solde_cloture_reel'],
                                 commentaire: $data['commentaire'] ?? null,
                             );
@@ -200,7 +198,7 @@ class CaisseSessionsTable
                             return;
                         }
 
-                        $ecart = (float) $data['solde_cloture_reel'] - (float) $data['solde_cloture_theorique'];
+                        $ecart = (float) $record->ecart;
 
                         Notification::make()
                             ->title('Session clôturée')

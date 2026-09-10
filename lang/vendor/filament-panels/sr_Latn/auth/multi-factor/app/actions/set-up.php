@@ -9,7 +9,7 @@ return [
         'heading' => 'Postavka aplikacije za autentifikaciju',
 
         'description' => <<<'BLADE'
-            Neophodna je aplikacija za autentifikaciju poput Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) da biste nastavili.
+            Neophodna je aplikacija za autentifikaciju poput Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) da biste nastavili.
             BLADE,
 
         'content' => [

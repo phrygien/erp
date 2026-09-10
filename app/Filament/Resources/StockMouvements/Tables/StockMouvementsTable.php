@@ -7,6 +7,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -38,7 +39,7 @@ class StockMouvementsTable
 
                 TextColumn::make('product.product_code')
                     ->label('Code produit')
-                    ->searchable(isIndividual: true)
+                    ->searchable(isIndividual: false)
                     ->sortable(),
 
                 TextColumn::make('product.EAN')
@@ -49,7 +50,7 @@ class StockMouvementsTable
 
                 TextColumn::make('product.designation')
                     ->label('Produit')
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable()
                     ->wrap(),
 
@@ -73,7 +74,7 @@ class StockMouvementsTable
                 TextColumn::make('receptionCommande.numero_reception')
                     ->label('N° réception')
                     ->searchable()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: false)
                     ->placeholder('-'),
 
                 TextColumn::make('stockLot.id')
@@ -98,6 +99,18 @@ class StockMouvementsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('date_mouvement', 'desc')
+            ->groups([
+                Group::make('type')
+                    ->label('Type de mouvement')
+                    ->getTitleFromRecordUsing(fn ($record): string => match ($record->type) {
+                        'entree' => 'Entrée',
+                        'sortie' => 'Sortie',
+                        'ajustement' => 'Ajustement',
+                        default => $record->type,
+                    })
+                    ->collapsible(),
+            ])
+            ->defaultGroup('type')
             ->filters([
                 SelectFilter::make('type')
                     ->options([

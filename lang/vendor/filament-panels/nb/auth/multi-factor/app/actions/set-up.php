@@ -9,7 +9,7 @@ return [
         'heading' => 'Aktiver autentiseringsapp for 2FA',
 
         'description' => <<<'BLADE'
-            Du trenger en app som Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) for å fullføre denne prosessen.
+            Du trenger en app som Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) for å fullføre denne prosessen.
             BLADE,
 
         'content' => [

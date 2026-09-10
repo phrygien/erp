@@ -9,7 +9,7 @@ return [
         'heading' => 'Configurar l\'aplicació d\'autenticació',
 
         'description' => <<<'BLADE'
-            Necessitaràs una aplicació com Google Authenticator (<x-filament::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filament::link>, <x-filament::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filament::link>) per completar aquest procés.
+            Necessitaràs una aplicació com Google Authenticator (<x-filamentOld::link href="https://itunes.apple.com/us/app/google-authenticator/id388497605" target="_blank">iOS</x-filamentOld::link>, <x-filamentOld::link href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</x-filamentOld::link>) per completar aquest procés.
             BLADE,
 
         'content' => [

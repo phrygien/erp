@@ -14,6 +14,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Summarizers\Average;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -76,7 +78,13 @@ class DetailCommandesRelationManager extends RelationManager
                 TextColumn::make('pu_achat_HT')
                     ->label('PU Achat HT')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR'),
+                    ->suffix(' EUR')
+                    ->summarize(
+                        Average::make()
+                            ->label('Moyenne')
+                            ->numeric(decimalPlaces: 2)
+                            ->suffix(' EUR')
+                    ),
 
                 TextColumn::make('tax')
                     ->label('Taxe %')
@@ -91,13 +99,23 @@ class DetailCommandesRelationManager extends RelationManager
                 TextColumn::make('pu_achat_net')
                     ->label('PU Achat Net')
                     ->numeric(decimalPlaces: 2)
-                    ->suffix(' EUR'),
+                    ->suffix(' EUR')
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                            ->numeric(decimalPlaces: 2)
+                            ->suffix(' EUR')
+                    ),
 
                 TextColumn::make('quantite')
                     ->label('Quantité')
                     ->numeric()
                     ->badge()
-                    ->color('info'),
+                    ->color('info')
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                    ),
 
                 TextColumn::make('repartitions_summary')
                     ->label('Répartition')

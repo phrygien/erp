@@ -169,7 +169,7 @@ return [
 
     'localization' => [
         'enabled' => false,
-        'key' => 'filament-shield::filament-shield.resource_permission_prefixes_labels',
+        'key' => 'filamentOld-shield::filamentOld-shield.resource_permission_prefixes_labels',
     ],
 
     /*

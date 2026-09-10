@@ -11,6 +11,8 @@ use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
@@ -221,6 +223,44 @@ class CommandeForm
                                             data_set($livewire->data, "items.{$itemKey}.quantite", $total);
                                         }),
                                 ]),
+
+                            Section::make('Résumé')
+                                ->schema([
+                                    Grid::make(3)
+                                        ->schema([
+                                            Placeholder::make('total_articles')
+                                                ->label('Nombre d\'articles')
+                                                ->content(function (callable $get) {
+                                                    return collect($get('items') ?? [])->count();
+                                                }),
+
+                                            Placeholder::make('total_quantite')
+                                                ->label('Quantité totale')
+                                                ->content(function (callable $get) {
+                                                    return collect($get('items') ?? [])
+                                                        ->sum(fn ($item) => (float) ($item['quantite'] ?? 0));
+                                                }),
+
+                                            Placeholder::make('total_montant_net')
+                                                ->label('Montant total net')
+                                                ->content(function (callable $get) {
+                                                    $total = collect($get('items') ?? [])->sum(function ($item) {
+                                                        $ht = (float) ($item['pu_achat_HT'] ?? 0);
+                                                        $tax = (float) ($item['tax'] ?? 0);
+                                                        $remise = (float) ($item['taux_remise'] ?? 0);
+                                                        $qte = (float) ($item['quantite'] ?? 0);
+                                                        $puNet = $ht + ($ht * $tax / 100) - ($ht * $remise / 100);
+
+                                                        return $puNet * $qte;
+                                                    });
+
+                                                    return new HtmlString(
+                                                        '<span class="font-semibold">' . number_format($total, 2) . ' EUR</span>'
+                                                    );
+                                                }),
+                                        ]),
+                                ])
+                                ->columnSpanFull(),
                         ]),
                 ])
                     ->columnSpanFull()

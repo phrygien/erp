@@ -13,8 +13,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -28,6 +27,7 @@ use Ipatco\FilamentProfile\FilamentProfilePlugin;
 
 use Filament\View\PanelsRenderHook;
 use App\Livewire\LanguageSwitcher;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -35,9 +35,11 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->spa()
+            //->maxContentWidth(Width::Full)
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->font('Urbanist')
             ->login()
             //->profile(EditProfile::class, isSimple: false)
             ->passwordReset()
@@ -45,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailChangeVerification()
             ->brandLogo(asset('images/img.png'))
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Rose,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

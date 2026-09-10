@@ -59,6 +59,7 @@ class FactureForm
                                             ])
                                             ->required()
                                             ->default('commande')
+                                            ->live()
                                             ->inline(),
 
                                         ToggleButtons::make('statut')
@@ -95,6 +96,20 @@ class FactureForm
                                             ->preload()
                                             ->required()
                                             ->live()
+                                            // Empêche la création d'une 2e facture du même type
+                                            // pour un même bon de commande (contrainte unique en
+                                            // base sur bon_commande_id + type) : on valide côté
+                                            // formulaire pour afficher une erreur propre plutôt
+                                            // que de laisser SQLite renvoyer une exception 500.
+                                            ->unique(
+                                                table: 'factures',
+                                                column: 'bon_commande_id',
+                                                ignoreRecord: true,
+                                                modifyRuleUsing: fn ($rule, Get $get) => $rule->where('type', $get('type')),
+                                            )
+                                            ->validationMessages([
+                                                'unique' => 'Une facture de ce type existe déjà pour ce bon de commande.',
+                                            ])
                                             // Dès qu'un bon de commande est choisi : on récupère le
                                             // fournisseur ET on génère automatiquement toutes les
                                             // lignes de facture depuis les detail_commandes liés
