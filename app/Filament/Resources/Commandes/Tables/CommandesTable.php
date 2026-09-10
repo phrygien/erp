@@ -5,13 +5,13 @@ namespace App\Filament\Resources\Commandes\Tables;
 use App\Mail\BonCommandeMail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -44,7 +44,12 @@ class CommandesTable
                     ->label('Montant total')
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' EUR')
                     ->sortable()
-                    ->alignEnd(),
+                    ->alignEnd()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                            ->formatStateUsing(fn ($state) => number_format($state, 2) . ' EUR')
+                    ),
 
                 TextColumn::make('etat_commande')
                     ->label('État')
@@ -90,7 +95,11 @@ class CommandesTable
                     ->label('Remise')
                     ->numeric()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                    ),
 
                 TextColumn::make('createdBy.name')
                     ->label('Créé par')
@@ -137,65 +146,67 @@ class CommandesTable
                     ]),
             ])
             ->recordActions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
+                ViewAction::make()
+                    ->label(''),
 
-                    Action::make('telechargerBonCommande')
-                        ->label('Télécharger bon de commande (PDF)')
-                        ->icon(Heroicon::OutlinedArrowDownTray)
-                        ->color('success')
-                        ->visible(fn ($record) => $record->bonCommande !== null)
-                        ->action(function ($record) {
-                            $bonCommande = $record->bonCommande;
+                EditAction::make()
+                    ->label(''),
 
-                            $pdf = Pdf::loadView('pdf.bon-commande', [
-                                'bonCommande' => $bonCommande,
-                                'commande' => $record,
-                            ]);
+                Action::make('telechargerBonCommande')
+                    ->label('')
+                    ->tooltip('Télécharger le bon de commande (PDF)')
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->color('success')
+                    ->visible(fn ($record) => $record->bonCommande !== null)
+                    ->action(function ($record) {
+                        $bonCommande = $record->bonCommande;
 
-                            return response()->streamDownload(
-                                fn () => print ($pdf->output()),
-                                "bon-commande-{$bonCommande->numero}.pdf"
-                            );
-                        }),
+                        $pdf = Pdf::loadView('pdf.bon-commande', [
+                            'bonCommande' => $bonCommande,
+                            'commande' => $record,
+                        ]);
 
-                    Action::make('envoyerBonCommande')
-                        ->label('Envoyer au fournisseur')
-                        ->icon(Heroicon::OutlinedEnvelope)
-                        ->color('info')
-                        ->visible(fn ($record) => $record->bonCommande !== null)
-                        ->disabled(fn ($record) => blank($record->fournisseur->email))
-                        ->tooltip(fn ($record) => blank($record->fournisseur->email)
-                            ? 'Aucune adresse e-mail renseignée pour ce fournisseur'
-                            : null)
-                        ->requiresConfirmation()
-                        ->modalHeading('Envoyer le bon de commande')
-                        ->modalDescription(fn ($record) => "Le bon de commande sera envoyé par e-mail à {$record->fournisseur->name} ({$record->fournisseur->email}).")
-                        ->modalSubmitActionLabel('Envoyer')
-                        ->action(function ($record) {
-                            $bonCommande = $record->bonCommande;
+                        return response()->streamDownload(
+                            fn () => print ($pdf->output()),
+                            "bon-commande-{$bonCommande->numero}.pdf"
+                        );
+                    }),
 
-                            $pdf = Pdf::loadView('pdf.bon-commande', [
-                                'bonCommande' => $bonCommande,
-                                'commande' => $record,
-                            ]);
+                Action::make('envoyerBonCommande')
+                    ->label('')
+                    ->tooltip(fn ($record) => blank($record->fournisseur->email)
+                        ? 'Aucune adresse e-mail renseignée pour ce fournisseur'
+                        : 'Envoyer au fournisseur')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->color('info')
+                    ->visible(fn ($record) => $record->bonCommande !== null)
+                    ->disabled(fn ($record) => blank($record->fournisseur->email))
+                    ->requiresConfirmation()
+                    ->modalHeading('Envoyer le bon de commande')
+                    ->modalDescription(fn ($record) => "Le bon de commande sera envoyé par e-mail à {$record->fournisseur->name} ({$record->fournisseur->email}).")
+                    ->modalSubmitActionLabel('Envoyer')
+                    ->action(function ($record) {
+                        $bonCommande = $record->bonCommande;
 
-                            Mail::to($record->fournisseur->email)->send(
-                                new BonCommandeMail(
-                                    commande: $record,
-                                    pdfContent: $pdf->output(),
-                                    pdfFilename: "bon-commande-{$bonCommande->numero}.pdf",
-                                )
-                            );
+                        $pdf = Pdf::loadView('pdf.bon-commande', [
+                            'bonCommande' => $bonCommande,
+                            'commande' => $record,
+                        ]);
 
-                            Notification::make()
-                                ->title('Bon de commande envoyé avec succès')
-                                ->body("Envoyé à {$record->fournisseur->email}")
-                                ->success()
-                                ->send();
-                        }),
-                ]),
+                        Mail::to($record->fournisseur->email)->send(
+                            new BonCommandeMail(
+                                commande: $record,
+                                pdfContent: $pdf->output(),
+                                pdfFilename: "bon-commande-{$bonCommande->numero}.pdf",
+                            )
+                        );
+
+                        Notification::make()
+                            ->title('Bon de commande envoyé avec succès')
+                            ->body("Envoyé à {$record->fournisseur->email}")
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -22,7 +22,7 @@ class ViewCommande extends ViewRecord
                     : 'Repasser en pré-commande')
                 ->icon(fn () => $this->record->etat_commande === 'pre_commande'
                     ? 'heroicon-o-check-circle'
-                    : 'heroicon-o-arrow-uturn-left')
+                    : 'heroicon-o-arrow-left-circle')
                 ->color(fn () => $this->record->etat_commande === 'pre_commande'
                     ? 'success'
                     : 'gray')
