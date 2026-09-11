@@ -27,8 +27,7 @@ use Ipatco\FilamentProfile\FilamentProfilePlugin;
 
 use Filament\View\PanelsRenderHook;
 use App\Livewire\LanguageSwitcher;
-use JohnRivera7\FilamentMia\MiaTheme;
-
+use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -88,7 +87,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn () => \Livewire\Livewire::mount(LanguageSwitcher::class),
-            );
-        //->plugin(ThemeEdinburghPlugin::make());
+            )
+        ->plugin(FilamentUiSwitcherPlugin::make()->withModeSwitcher());
     }
 }

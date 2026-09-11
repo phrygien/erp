@@ -98,27 +98,41 @@
                             Scanner un code-barres
                         </x-slot>
 
-                        {{-- Scan code-barres : entrée principale, la plus rapide pour un caissier --}}
-                        <div class="relative">
-                            <x-filament::input.wrapper prefix-icon="heroicon-o-viewfinder-circle">
-                                <x-filament::input
-                                    type="text"
-                                    autofocus
-                                    wire:model="scanInput"
-                                    wire:keydown.enter="scannerProduit"
-                                    wire:loading.attr="disabled"
-                                    wire:target="scannerProduit"
-                                    placeholder="Scannez ou saisissez un EAN / code produit puis Entrée"
-                                />
-                            </x-filament::input.wrapper>
+                        <div class="space-y-2">
+                            {{-- Scan physique (douchette USB en mode "clavier") : entrée
+                                 principale, la plus rapide pour un caissier équipé. --}}
+                            <div class="relative">
+                                <x-filament::input.wrapper prefix-icon="heroicon-o-viewfinder-circle">
+                                    <x-filament::input
+                                        type="text"
+                                        autofocus
+                                        wire:model="scanInput"
+                                        wire:keydown.enter="scannerProduit"
+                                        wire:loading.attr="disabled"
+                                        wire:target="scannerProduit"
+                                        placeholder="Scannez ou saisissez un EAN / code produit puis Entrée"
+                                    />
+                                </x-filament::input.wrapper>
 
-                            <div
-                                wire:loading
-                                wire:target="scannerProduit"
-                                class="pointer-events-none absolute inset-y-0 right-3 flex items-center"
-                            >
-                                <x-filament::loading-indicator class="h-5 w-5 text-gray-400" />
+                                <div
+                                    wire:loading
+                                    wire:target="scannerProduit"
+                                    class="pointer-events-none absolute inset-y-0 right-3 flex items-center"
+                                >
+                                    <x-filament::loading-indicator class="h-5 w-5 text-gray-400" />
+                                </div>
                             </div>
+
+                            <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                <span class="h-px flex-1 bg-gray-200 dark:bg-white/10"></span>
+                                ou
+                                <span class="h-px flex-1 bg-gray-200 dark:bg-white/10"></span>
+                            </div>
+
+                            {{-- Scan caméra (filament-barcode-scanner-field) : ouvre un
+                                 modal utilisant l'appareil photo, utile sur mobile/tablette
+                                 ou en l'absence de douchette physique. --}}
+                            {{ $this->scannerForm }}
                         </div>
                     </x-filament::fieldset>
 

@@ -120,6 +120,40 @@ class FactureForm
 
                                                 self::genererLignesDepuisCommande($set, $bonCommande?->commande_id);
                                                 self::recalculerTotauxFacture($set, $get);
+                                            })
+                                            // Couvre le cas où bon_commande_id est déjà rempli au
+                                            // chargement du formulaire (ex: création de facture
+                                            // depuis une action sur un bon de commande, valeur
+                                            // passée en query string, ->default(...)...) :
+                                            // afterStateUpdated ne se déclenche pas à l'hydratation
+                                            // initiale, donc on génère les lignes ici.
+                                            //
+                                            // IMPORTANT : restreint à la création uniquement
+                                            // (via $operation). Sur la page Edit, ce hook se
+                                            // déclenche aussi à l'hydratation mais le Repeater
+                                            // detailFactures n'est pas garanti d'être déjà rempli
+                                            // à ce moment (ordre d'hydratation des composants) :
+                                            // se fier à "detailFactures vide" pour décider de
+                                            // régénérer est donc dangereux et peut écraser les
+                                            // lignes réelles (quantités facturées, remises) par
+                                            // des lignes fraîches recalculées depuis la commande,
+                                            // en plus de casser le lien avec les enregistrements
+                                            // existants (nouvelles clés UUID au lieu des IDs réels).
+                                            ->afterStateHydrated(function (Set $set, Get $get, $state, ?string $operation) {
+                                                if ($operation !== 'create' || ! $state) {
+                                                    return;
+                                                }
+
+                                                $bonCommande = BonCommande::with('commande')->find($state);
+
+                                                if (! $bonCommande) {
+                                                    return;
+                                                }
+
+                                                $set('fournisseur_id', $bonCommande->commande?->fournisseur_id);
+
+                                                self::genererLignesDepuisCommande($set, $bonCommande->commande_id);
+                                                self::recalculerTotauxFacture($set, $get);
                                             }),
 
                                         Select::make('fournisseur_id')
@@ -162,8 +196,18 @@ class FactureForm
                                     ->schema([
                                         Select::make('detail_commande_id')
                                             ->label('Produit')
-                                            ->options(function (Get $get) {
-                                                $bonCommandeId = $get('../../bon_commande_id');
+                                            // IMPORTANT : au premier rendu de la page Edit,
+                                            // Get::get('../../bon_commande_id') peut encore
+                                            // renvoyer null (le champ parent n'est pas garanti
+                                            // d'être déjà résolu dans le state Livewire à ce
+                                            // moment précis). Sans fallback, les options sont
+                                            // vides et les lignes existantes du Repeater
+                                            // n'affichent pas leur produit tant qu'on n'a pas
+                                            // resélectionné un bon de commande. Le $record injecté
+                                            // ici est celui de l'ITEM du Repeater (DetailFacture),
+                                            // pas la Facture parente : on remonte via sa relation.
+                                            ->options(function (Get $get, ?\App\Models\DetailFacture $record) {
+                                                $bonCommandeId = $get('../../bon_commande_id') ?? $record?->facture?->bon_commande_id;
 
                                                 if (! $bonCommandeId) {
                                                     return [];
@@ -258,6 +302,36 @@ class FactureForm
                             ])
                             ->live()
                             ->afterStateUpdated(fn (Set $set, Get $get) => self::recalculerTotauxFacture($set, $get))
+                            // Filet de sécurité : sur Edit/View, si le Repeater arrive vide
+                            // à l'hydratation (le chargement automatique via ->relationship()
+                            // ne s'est pas produit à temps), on recharge nous-mêmes les vraies
+                            // lignes depuis la base, avec leurs vrais IDs comme clés (et non
+                            // des UUID générés), pour rester cohérent avec la sauvegarde de la
+                            // relation par Filament.
+                            ->afterStateHydrated(function (Set $set, Get $get, $state, ?string $operation, ?\App\Models\Facture $record) {
+                                if ($operation === 'create' || ! $record || ! empty($state)) {
+                                    return;
+                                }
+
+                                $lignes = $record->detailFactures()
+                                    ->get()
+                                    ->mapWithKeys(fn ($detail) => [
+                                        (string) $detail->id => [
+                                            'detail_commande_id' => $detail->detail_commande_id,
+                                            'quantite_commande'  => $detail->quantite_commande,
+                                            'quantite_facturee'  => $detail->quantite_facturee,
+                                            'prix_unitaire_ht'   => $detail->prix_unitaire_ht,
+                                            'montant_ht'         => $detail->montant_ht,
+                                            'montant_remise'     => $detail->montant_remise,
+                                            'montant_final_ht'   => $detail->montant_final_ht,
+                                            'montant_final_net'  => $detail->montant_final_net,
+                                        ],
+                                    ])
+                                    ->toArray();
+
+                                $set('detailFactures', $lignes);
+                                self::recalculerTotauxFacture($set, $get);
+                            })
                             ->deleteAction(
                                 fn ($action) => $action->after(fn (Set $set, Get $get) => self::recalculerTotauxFacture($set, $get)),
                             )

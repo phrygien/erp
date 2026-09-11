@@ -21,6 +21,7 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
+use Marcelorodrigo\FilamentBarcodeScannerField\Forms\Components\BarcodeInput;
 
 class PosCaisse extends Page implements HasSchemas
 {
@@ -35,6 +36,12 @@ class PosCaisse extends Page implements HasSchemas
     public ?CaisseSession $session = null;
 
     public string $scanInput = '';
+
+    /**
+     * State du schema du scanner caméra (BarcodeInput). Contient une seule
+     * clé 'code', réinitialisée à null après chaque scan traité.
+     */
+    public array $scannerData = [];
 
     /**
      * Requête de recherche produit (code, EAN ou désignation).
@@ -90,6 +97,38 @@ class PosCaisse extends Page implements HasSchemas
         }
 
         $this->cartForm->fill(['cart' => []]);
+        $this->scannerForm->fill(['code' => null]);
+    }
+
+    /**
+     * Champ de scan caméra (filament-barcode-scanner-field). Complète le
+     * champ texte $scanInput (utilisé par les douchettes USB en mode
+     * "clavier") en offrant une capture via l'appareil photo, utile
+     * notamment sur mobile/tablette sans scanner physique.
+     * Référencé dans la vue via {{ $this->scannerForm }}.
+     */
+    public function scannerForm(Schema $schema): Schema
+    {
+        return $schema
+            ->statePath('scannerData')
+            ->components([
+                BarcodeInput::make('code')
+                    ->hiddenLabel()
+                    ->icon('heroicon-o-qr-code')
+                    ->placeholder('Scanner avec la caméra')
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, callable $set) {
+                        if (blank($state)) {
+                            return;
+                        }
+
+                        $this->traiterCodeScanne($state);
+
+                        // Réinitialise le champ pour permettre un nouveau
+                        // scan immédiat sans garder l'ancien code affiché.
+                        $set('code', null);
+                    }),
+            ]);
     }
 
     /**
@@ -275,36 +314,19 @@ class PosCaisse extends Page implements HasSchemas
 
     /**
      * Appelé quand l'utilisateur scanne un code-barres (EAN) ou saisit un
-     * product_code dans le champ de scan, puis valide (Enter). Le produit
-     * correspondant est ajouté directement comme nouvelle ligne du panier.
+     * product_code dans le champ de scan physique (douchette USB), puis
+     * valide (Enter).
      */
     public function scannerProduit(): void
     {
         $code = trim($this->scanInput);
+        $this->scanInput = '';
 
         if ($code === '') {
             return;
         }
 
-        $product = Product::query()
-            ->where('state', 'active')
-            ->where(fn ($q) => $q
-                ->where('EAN', $code)
-                ->orWhere('product_code', $code))
-            ->first();
-
-        $this->scanInput = '';
-
-        if (! $product) {
-            Notification::make()
-                ->title("Aucun produit trouvé pour le code « {$code} ».")
-                ->warning()
-                ->send();
-
-            return;
-        }
-
-        $this->ajouterAuPanier($product->id);
+        $this->traiterCodeScanne($code);
     }
 
     /**
@@ -320,6 +342,38 @@ class PosCaisse extends Page implements HasSchemas
         }
 
         $this->scannerProduit();
+    }
+
+    /**
+     * Logique commune de résolution d'un code scanné (EAN ou product_code)
+     * en produit, partagée par le champ physique (douchette, $scanInput)
+     * et le champ caméra (BarcodeInput, scannerForm).
+     */
+    protected function traiterCodeScanne(string $code): void
+    {
+        $code = trim($code);
+
+        if ($code === '') {
+            return;
+        }
+
+        $product = Product::query()
+            ->where('state', 'active')
+            ->where(fn ($q) => $q
+                ->where('EAN', $code)
+                ->orWhere('product_code', $code))
+            ->first();
+
+        if (! $product) {
+            Notification::make()
+                ->title("Aucun produit trouvé pour le code « {$code} ».")
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $this->ajouterAuPanier($product->id);
     }
 
     /**

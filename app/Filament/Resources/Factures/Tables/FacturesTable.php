@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Factures\Tables;
 
 use App\Models\Facture;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -12,6 +13,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -30,7 +33,10 @@ class FacturesTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyMessage('Numéro copié'),
+                    ->copyMessage('Numéro copié')
+                    ->summarize(
+                        Count::make()->label('Total factures')
+                    ),
 
                 TextColumn::make('libelle_facture')
                     ->label('Libellé')
@@ -47,31 +53,45 @@ class FacturesTable
 
                 TextColumn::make('date_facture')
                     ->label('Date facture')
-                    ->date('d/m/Y')
+                    ->formatStateUsing(fn ($state) => $state
+                        ? ucfirst(Carbon::parse($state)->locale('fr')->translatedFormat('d F Y'))
+                        : null)
                     ->sortable(),
 
                 TextColumn::make('montant_ht')
                     ->label('Montant HT')
                     ->money('EUR')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->summarize(
+                        Sum::make()->label('Total HT')->money('EUR')
+                    ),
 
                 TextColumn::make('remise')
                     ->label('Remise')
                     ->money('EUR')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->summarize(
+                        Sum::make()->label('Total remises')->money('EUR')
+                    ),
 
                 TextColumn::make('montant_tva')
                     ->label('TVA')
                     ->money('EUR')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->summarize(
+                        Sum::make()->label('Total TVA')->money('EUR')
+                    ),
 
                 TextColumn::make('montant_ttc')
                     ->label('Montant TTC')
                     ->money('EUR')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()->label('Total TTC')->money('EUR')
+                    ),
 
                 TextColumn::make('type')
                     ->label('Type')
