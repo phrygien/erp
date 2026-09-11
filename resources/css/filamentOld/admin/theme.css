@@ -1,0 +1,4 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+@source '../../../../vendor/wire-elements/**/*.blade.php';
+@source '../../../../app/Filament/**/*.php';
+@source '../../../../resources/views/filament/**/*.blade.php';

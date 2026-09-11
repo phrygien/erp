@@ -27,6 +27,7 @@ use Ipatco\FilamentProfile\FilamentProfilePlugin;
 
 use Filament\View\PanelsRenderHook;
 use App\Livewire\LanguageSwitcher;
+use JohnRivera7\FilamentMia\MiaTheme;
 
 class AdminPanelProvider extends PanelProvider
 {

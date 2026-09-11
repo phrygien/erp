@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "56ae0a3e2f120ddb0f9d1c989916aaef",
+    "content-hash": "b6592fff0c4a5e39906009bed452ddfb",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2507,6 +2507,78 @@
                 }
             ],
             "time": "2026-07-24T12:36:51+00:00"
+        },
+        {
+            "name": "johnrivera7/filament-mia-theme",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Johnrivera7/filament-mia-theme.git",
+                "reference": "fd66526ef79bf620cfb58550d2e6438baf6e9b41"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Johnrivera7/filament-mia-theme/zipball/fd66526ef79bf620cfb58550d2e6438baf6e9b41",
+                "reference": "fd66526ef79bf620cfb58550d2e6438baf6e9b41",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^5.7",
+                "illuminate/contracts": "^11.28|^12.0|^13.0",
+                "illuminate/support": "^11.28|^12.0|^13.0",
+                "php": "^8.4",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18",
+                "livewire/livewire": "^3.0|^4.0",
+                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "JohnRivera7\\FilamentMia\\FilamentMiaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "JohnRivera7\\FilamentMia\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "John Rivera",
+                    "email": "johnriveragonzalez7@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A warm editorial theme for Filament v5, for panels that are part of the product. Cream and champagne in the light, espresso in the dark, serif headings and hairline borders. Every surface set by hand rather than derived from an accent colour. Ships pre-compiled: no build step.",
+            "homepage": "https://github.com/Johnrivera7/filament-mia-theme",
+            "keywords": [
+                "admin-theme",
+                "dark-mode",
+                "design-system",
+                "filament",
+                "filament-plugin",
+                "filament-theme",
+                "filamentphp",
+                "johnrivera7",
+                "laravel",
+                "tailwindcss",
+                "theme"
+            ],
+            "support": {
+                "issues": "https://github.com/Johnrivera7/filament-mia-theme/issues",
+                "source": "https://github.com/Johnrivera7/filament-mia-theme"
+            },
+            "time": "2026-09-09T19:50:17+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",
