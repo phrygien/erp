@@ -1,0 +1,15 @@
+/* resources/css/filament/admin/utilities.css */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+
+/* Empêche le conteneur principal de créer un containing block
+   pour les éléments position:fixed pendant l'animation d'entrée */
+/* resources/css/filament/admin/utilities.css */
+.fi-main {
+    transform: none !important;
+    filter: none !important;
+    will-change: auto !important;
+}
